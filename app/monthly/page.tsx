@@ -26,7 +26,7 @@ async function fetchMonthTop10(year: number, month: number): Promise<MonthData> 
     from: String(start),
     to: String(end),
     sort: "points",
-    per_page: 10,
+    per_page: 20,
     page: 0,
   });
 
@@ -73,7 +73,7 @@ export default async function MonthlyPage() {
     <div className="mx-auto max-w-5xl px-4 py-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Monthly Highlights</h1>
       <p className="text-sm text-gray-500 mb-8">
-        Top 10 stories from each of the last 12 months, ranked by points.
+        Top 20 stories from each of the last 12 months, ranked by points.
       </p>
       {data.map((month) => (
         <MonthSection
