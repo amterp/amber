@@ -16,7 +16,8 @@ interface MonthData {
 }
 
 async function fetchMonthTop10(year: number, month: number): Promise<MonthData> {
-  const cacheKey = `monthly-${year}-${month}`;
+  const perPage = 20;
+  const cacheKey = `monthly-${year}-${month}-${perPage}`;
   const cached = cacheGet<MonthData>(cacheKey);
   if (cached) return cached;
 
@@ -26,7 +27,7 @@ async function fetchMonthTop10(year: number, month: number): Promise<MonthData> 
     from: String(start),
     to: String(end),
     sort: "points",
-    per_page: 20,
+    per_page: perPage,
     page: 0,
   });
 
