@@ -18,7 +18,7 @@ const TYPES: { label: string; value: SubmissionType }[] = [
 export default function TypeFilter({ selected, onToggle }: Props) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</span>
+      <span className="text-xs font-medium text-gray-500 uppercase tracking-wide dark:text-gray-400">Type</span>
       {TYPES.map((type) => (
         <button
           key={type.value}
@@ -26,7 +26,7 @@ export default function TypeFilter({ selected, onToggle }: Props) {
           className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
             selected.has(type.value)
               ? "bg-orange-500 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           }`}
         >
           {type.label}

@@ -52,7 +52,7 @@ export default function BrowseControls() {
   };
 
   return (
-    <div className="sticky top-12 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-sm">
+    <div className="sticky top-12 z-40 border-b border-gray-200 bg-white/95 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/95">
       <div className="mx-auto max-w-5xl px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
         <TimeRangePicker
           selected={timeRange}
