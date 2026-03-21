@@ -6,7 +6,7 @@ interface Props {
   submissions: Submission[];
 }
 
-export default function MonthSection({ title, submissions }: Props) {
+export default function PeriodSection({ title, submissions }: Props) {
   return (
     <section className="mb-8">
       <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 border-b-2 border-orange-400 pb-1 mb-2">

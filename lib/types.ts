@@ -40,6 +40,14 @@ export type SortOrder = "points" | "date";
 
 export type TimeRange = "24h" | "7d" | "30d" | "1y" | "custom";
 
+export type Step = "daily" | "weekly" | "monthly";
+
+export interface Period {
+  start: number; // Unix timestamp (seconds)
+  end: number;   // Unix timestamp (seconds)
+  label: string;
+}
+
 export interface SearchParams {
   q?: string;
   type?: string;
