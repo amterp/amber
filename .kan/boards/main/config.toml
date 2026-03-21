@@ -6,47 +6,66 @@ default_column = "backlog-lo"
 [[columns]]
   name = "backlog-lo"
   color = "#6b7280"
+  description = "Low priority planned work"
   limit = 0
 
 [[columns]]
   name = "backlog-hi"
   color = "#3b82f6"
-  limit = 0
+  description = "High priority planned work"
+  limit = 10
 
 [[columns]]
   name = "next"
   color = "#f59e0b"
-  limit = 0
+  description = "Ready to be picked up next"
+  limit = 5
+  card_ids = ["a_kjuUKgqC", "a_kjxbqY9E", "a_kjy2i0vX", "a_kjycnUrT"]
 
 [[columns]]
   name = "in-progress"
   color = "#10b981"
-  limit = 0
+  description = "Currently being worked on"
+  limit = 3
 
 [[columns]]
   name = "done"
   color = "#9333ea"
+  description = "Completed work"
   limit = 0
+  card_ids = ["a_kjtujIvS"]
 
 [custom_fields]
   [custom_fields.type]
     type = "enum"
+    wanted = true
+    description = "The category of work this card represents"
 
     [[custom_fields.type.options]]
       value = "bug"
       color = "#dc2626"
+      description = "A defect in existing functionality"
 
     [[custom_fields.type.options]]
       value = "enhancement"
       color = "#2563eb"
+      description = "An improvement to existing functionality"
 
     [[custom_fields.type.options]]
       value = "feature"
       color = "#16a34a"
+      description = "New functionality to be added"
 
     [[custom_fields.type.options]]
       value = "chore"
       color = "#4b5563"
+      description = "Maintenance, refactoring, or housekeeping"
 
 [card_display]
   type_indicator = "type"
+
+[[pattern_hooks]]
+  name = "type-shortcut"
+  pattern_title = "![a-zA-Z]+"
+  command = ".kan/hooks/type-shortcut.rad"
+  timeout = 0

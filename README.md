@@ -52,6 +52,12 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Project Management
+
+This project uses [Kan](https://github.com/amterp/kan) for task tracking.
+Run `kan serve` to view the board in the browser, or use the `kan` CLI
+directly.
+
 ## Tech Stack
 
 - Next.js (App Router) + TypeScript
