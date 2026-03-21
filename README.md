@@ -1,7 +1,9 @@
 # HN Browser
 
-A clean interface for browsing top Hacker News submissions by time
-period and type, plus a structured REST API for programmatic access.
+A historical discovery tool for Hacker News. If you don't have time to
+check HN every day, this lets you go back and surface the best content
+from any time period - whether that's the last 24 hours or the last
+year.
 
 All data is fetched live from the
 [Algolia HN API](https://hn.algolia.com/api) - no database required.
