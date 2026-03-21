@@ -53,19 +53,19 @@ export const openapiSpec = {
             name: "sort",
             in: "query",
             schema: { type: "string", enum: ["points", "date"], default: "points" },
-            description: "Sort order: 'points' (highest first) or 'date' (newest first)",
+            description: "Sort order: 'points' (highest first) or 'date' (newest first). Note: when 'q' is provided, 'points' sorting uses Algolia's relevance ranking (which factors in points) rather than strict points ordering. Use 'date' if you need deterministic sort order with a query.",
           },
           {
             name: "page",
             in: "query",
-            schema: { type: "integer", default: 0 },
+            schema: { type: "integer", default: 0, minimum: 0 },
             description: "Page number (0-indexed)",
           },
           {
             name: "per_page",
             in: "query",
-            schema: { type: "integer", default: 20, maximum: 100 },
-            description: "Results per page (max 100)",
+            schema: { type: "integer", default: 20, minimum: 1, maximum: 100 },
+            description: "Results per page (1-100)",
           },
         ],
         responses: {
@@ -107,6 +107,19 @@ export const openapiSpec = {
           },
           "400": {
             description: "Invalid parameters",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    error: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          "502": {
+            description: "Upstream API error (Algolia unavailable)",
             content: {
               "application/json": {
                 schema: {

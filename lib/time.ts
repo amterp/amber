@@ -21,7 +21,11 @@ export function parseDate(input: string): number {
   if (!isNaN(asNumber) && asNumber > 1e9) {
     return Math.floor(asNumber);
   }
-  const date = new Date(input);
+  // Date-only strings (YYYY-MM-DD) are parsed as UTC midnight by the JS spec,
+  // which shifts the boundary in non-UTC timezones. Appending T00:00:00 forces
+  // local-time interpretation, matching what a user selecting a date expects.
+  const normalized = /^\d{4}-\d{2}-\d{2}$/.test(input) ? `${input}T00:00:00` : input;
+  const date = new Date(normalized);
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid date: ${input}`);
   }
@@ -39,13 +43,13 @@ export function formatTimeAgo(timestamp: number): string {
   if (days < 30) return `${days}d ago`;
   const months = Math.floor(days / 30);
   if (months < 12) return `${months}mo ago`;
-  const years = Math.floor(days / 365);
+  const years = Math.floor(months / 12);
   return `${years}y ago`;
 }
 
 export function getMonthRange(year: number, month: number): { start: number; end: number } {
-  const start = Math.floor(new Date(year, month, 1).getTime() / 1000);
-  const end = Math.floor(new Date(year, month + 1, 1).getTime() / 1000);
+  const start = Math.floor(Date.UTC(year, month, 1) / 1000);
+  const end = Math.floor(Date.UTC(year, month + 1, 1) / 1000);
   return { start, end };
 }
 

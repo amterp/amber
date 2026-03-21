@@ -34,6 +34,7 @@ export default function TimeRangePicker({
         <button
           key={preset.value}
           onClick={() => onSelect(preset.value)}
+          aria-pressed={selected === preset.value}
           className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
             selected === preset.value
               ? "bg-orange-500 text-white"

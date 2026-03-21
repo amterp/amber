@@ -1,3 +1,5 @@
+export const VALID_TYPES = ["story", "ask_hn", "show_hn", "poll", "job"] as const;
+
 export interface AlgoliaHit {
   objectID: string;
   title: string;
@@ -32,7 +34,7 @@ export interface Submission {
   type: SubmissionType;
 }
 
-export type SubmissionType = "story" | "ask_hn" | "show_hn" | "poll" | "job";
+export type SubmissionType = (typeof VALID_TYPES)[number];
 
 export type SortOrder = "points" | "date";
 

@@ -15,7 +15,7 @@ interface MonthData {
   submissions: Submission[];
 }
 
-async function fetchMonthTop10(year: number, month: number): Promise<MonthData> {
+async function fetchMonthTopStories(year: number, month: number): Promise<MonthData> {
   const perPage = 20;
   const cacheKey = `monthly-${year}-${month}-${perPage}`;
   const cached = cacheGet<MonthData>(cacheKey);
@@ -43,7 +43,6 @@ async function fetchMonthTop10(year: number, month: number): Promise<MonthData> 
 function getLast12Months(): { year: number; month: number }[] {
   const months: { year: number; month: number }[] = [];
   const now = new Date();
-  // Start from last complete month
   let year = now.getFullYear();
   let month = now.getMonth() - 1;
   if (month < 0) {
@@ -66,14 +65,22 @@ export const dynamic = "force-dynamic";
 
 export default async function MonthlyPage() {
   const months = getLast12Months();
-  const data = await Promise.all(
-    months.map(({ year, month }) => fetchMonthTop10(year, month)),
+  const results = await Promise.allSettled(
+    months.map(({ year, month }) => fetchMonthTopStories(year, month)),
   );
+
+  const data = results.map((result, i) => {
+    if (result.status === "fulfilled") return result.value;
+    return {
+      label: formatMonthYear(months[i].year, months[i].month),
+      submissions: [],
+    };
+  });
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Monthly Highlights</h1>
-      <p className="text-sm text-gray-500 mb-8">
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
         Top 20 stories from each of the last 12 months, ranked by points.
       </p>
       {data.map((month) => (

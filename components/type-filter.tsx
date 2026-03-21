@@ -23,6 +23,7 @@ export default function TypeFilter({ selected, onToggle }: Props) {
         <button
           key={type.value}
           onClick={() => onToggle(type.value)}
+          aria-pressed={selected.has(type.value)}
           className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
             selected.has(type.value)
               ? "bg-orange-500 text-white"

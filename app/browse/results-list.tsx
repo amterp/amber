@@ -23,6 +23,7 @@ export default function ResultsList() {
     page: 0,
     error: null,
   });
+  const [retryKey, setRetryKey] = useState(0);
 
   const buildApiUrl = useCallback(
     (page: number) => {
@@ -79,11 +80,11 @@ export default function ResultsList() {
     return () => {
       cancelled = true;
     };
-  }, [buildApiUrl]);
+  }, [buildApiUrl, retryKey]);
 
   const loadMore = async () => {
     const nextPage = state.page + 1;
-    setState((s) => ({ ...s, loading: true }));
+    setState((s) => ({ ...s, loading: true, error: null }));
     try {
       const res = await fetch(buildApiUrl(nextPage));
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -100,29 +101,45 @@ export default function ResultsList() {
     }
   };
 
-  if (state.error) {
-    return (
-      <div className="mx-auto max-w-5xl px-4 py-8 text-center text-red-500">
-        Error: {state.error}
-      </div>
-    );
-  }
+  const retry = () => {
+    if (state.hits.length > 0) {
+      loadMore();
+    } else {
+      setRetryKey((k) => k + 1);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-4">
       {state.hits.map((hit, i) => (
-        <SubmissionCard key={hit.id} submission={hit} rank={state.page > 0 ? i + 1 : i + 1} />
+        <SubmissionCard key={hit.id} submission={hit} rank={i + 1} />
       ))}
 
       {state.loading && (
-        <div className="py-8 text-center text-gray-400">Loading...</div>
+        <div className="py-8 text-center text-gray-400 dark:text-gray-500">Loading...</div>
       )}
 
-      {!state.loading && state.hits.length === 0 && (
-        <div className="py-8 text-center text-gray-400">No results found</div>
+      {!state.loading && state.error && (
+        <div className="py-6 text-center">
+          <p className="text-red-500 dark:text-red-400 text-sm mb-2">
+            {state.hits.length > 0
+              ? "Failed to load more results."
+              : "Something went wrong loading results."}
+          </p>
+          <button
+            onClick={retry}
+            className="text-sm text-orange-600 dark:text-orange-400 hover:underline"
+          >
+            Try again
+          </button>
+        </div>
       )}
 
-      {!state.loading && state.hasMore && (
+      {!state.loading && !state.error && state.hits.length === 0 && (
+        <div className="py-8 text-center text-gray-400 dark:text-gray-500">No results found</div>
+      )}
+
+      {!state.loading && !state.error && state.hasMore && (
         <div className="py-6 text-center">
           <button
             onClick={loadMore}
