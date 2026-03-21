@@ -45,7 +45,7 @@ export default function TimeRangePicker({
         </button>
       ))}
       {selected === "custom" && (
-        <div className="flex items-center gap-2 ml-1">
+        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-1">
           <input
             type="date"
             value={customFrom}

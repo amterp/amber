@@ -22,13 +22,13 @@ export default function ThemeToggle() {
     }
   };
 
-  if (!mounted) return <div className="w-8 h-8" />;
+  if (!mounted) return <div className="w-9 h-9 sm:w-8 sm:h-8" />;
 
   return (
     <button
       onClick={toggle}
       aria-label="Toggle dark mode"
-      className="ml-auto w-8 h-8 flex items-center justify-center rounded-full hover:bg-orange-600 transition-colors text-lg"
+      className="ml-auto w-9 h-9 flex items-center justify-center rounded-full hover:bg-orange-600 transition-colors text-lg sm:w-8 sm:h-8"
     >
       {dark ? "\u2600\uFE0F" : "\uD83C\uDF19"}
     </button>

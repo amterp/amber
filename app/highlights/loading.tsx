@@ -3,7 +3,7 @@ export default function HighlightsLoading() {
     <div>
       {/* Controls skeleton */}
       <div className="sticky top-12 z-40 border-b border-gray-200 bg-white/95 dark:border-gray-700 dark:bg-gray-900/95">
-        <div className="mx-auto max-w-5xl px-4 py-3 flex gap-6">
+        <div className="mx-auto max-w-5xl px-4 py-3 flex flex-col gap-3 sm:flex-row sm:gap-6">
           <div className="flex items-center gap-2">
             <div className="h-3 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             <div className="h-7 w-16 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />

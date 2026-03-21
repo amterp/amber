@@ -41,7 +41,7 @@ export default function SubmissionCard({ submission, rank }: Props) {
             <span className="text-xs text-gray-400 whitespace-nowrap dark:text-gray-500">({domain})</span>
           )}
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-gray-500 dark:text-gray-400">
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 text-xs text-gray-500 sm:gap-x-2 dark:text-gray-400">
           <span className="font-medium text-orange-600 dark:text-orange-400">{points} pts</span>
           <span>by {author}</span>
           <span>{formatTimeAgo(createdAtTimestamp)}</span>

@@ -1,0 +1,9 @@
+kan_schema = "project/1"
+id = "p_kjp8HB6R"
+name = "hn-browser"
+
+[favicon]
+  background = "#10b981"
+  icon_type = "letter"
+  letter = "H"
+  emoji = ""
