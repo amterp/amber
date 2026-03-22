@@ -1,4 +1,4 @@
-# HN Browser
+# Amber
 
 A historical discovery tool for Hacker News. If you don't have time to
 check HN every day, this lets you go back and surface the best content

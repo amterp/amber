@@ -3,7 +3,7 @@ import HighlightsControls from "./highlights-controls";
 import HighlightsFeed from "./highlights-feed";
 
 export const metadata = {
-  title: "Highlights - HN Browser",
+  title: "Highlights - Amber",
 };
 
 export default function HighlightsPage() {

@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "API Docs - HN Browser",
+  title: "API Docs - Amber",
 };
 
 function Code({ children }: { children: React.ReactNode }) {
@@ -34,7 +34,7 @@ export default function ApiDocsPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 text-gray-700 dark:text-gray-300 leading-relaxed">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-        HN Browser API
+        Amber API
       </h1>
       <p className="text-gray-600 dark:text-gray-400 mb-6">
         A clean REST API for searching and filtering Hacker News submissions.

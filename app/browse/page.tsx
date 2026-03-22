@@ -3,7 +3,7 @@ import BrowseControls from "./browse-controls";
 import ResultsList from "./results-list";
 
 export const metadata = {
-  title: "Browse - HN Browser",
+  title: "Browse - Amber",
 };
 
 export default function BrowsePage() {

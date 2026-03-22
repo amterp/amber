@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HN Browser",
+  title: "Amber",
   description: "Browse top Hacker News submissions by time period and type",
 };
 

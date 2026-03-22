@@ -7,7 +7,7 @@ export default function Nav() {
     <nav className="sticky top-0 z-50 border-b border-orange-200 bg-orange-500 text-white shadow-sm dark:border-orange-800 dark:bg-orange-700">
       <div className="mx-auto flex h-12 max-w-5xl items-center gap-3 px-4 sm:gap-6">
         <Link href="/browse" className="text-base font-bold tracking-tight sm:text-lg">
-          HN Browser
+          Amber
         </Link>
         <NavLinks />
         <ThemeToggle />

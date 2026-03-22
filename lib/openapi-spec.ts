@@ -1,7 +1,7 @@
 export const openapiSpec = {
   openapi: "3.1.0",
   info: {
-    title: "HN Browser API",
+    title: "Amber API",
     description: "A clean REST API for searching Hacker News via Algolia. Supports filtering by type, time range, points, and comments.",
     version: "1.0.0",
   },
