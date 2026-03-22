@@ -35,7 +35,7 @@ export default function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label="Toggle dark mode"
-      className="ml-auto w-9 h-9 flex items-center justify-center rounded-full hover:bg-orange-600 transition-colors text-lg sm:w-8 sm:h-8"
+      className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-orange-600 transition-colors text-lg sm:w-8 sm:h-8"
     >
       {dark ? "\u2600\uFE0F" : "\uD83C\uDF19"}
     </button>

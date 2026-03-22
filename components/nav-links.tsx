@@ -18,7 +18,7 @@ const links = isStaticExport
 export default function NavLinks() {
   const pathname = usePathname();
   return (
-    <div className="flex gap-2 text-sm font-medium sm:gap-4">
+    <div className="flex items-center gap-2 text-sm font-medium sm:gap-4">
       {links.map(({ href, label }) => (
         <Link
           key={href}
@@ -32,6 +32,15 @@ export default function NavLinks() {
           {label}
         </Link>
       ))}
+      <span className="text-orange-300 dark:text-orange-400">|</span>
+      <a
+        href="https://hn.algolia.com/api"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-xs text-orange-200 hover:text-white transition-colors dark:text-orange-300"
+      >
+        Powered by Algolia
+      </a>
     </div>
   );
 }
