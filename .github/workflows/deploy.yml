@@ -27,10 +27,9 @@ jobs:
       # Remove API routes that require a server runtime.
       # The UI calls Algolia directly - these are only for
       # external consumers running Amber locally.
-      - run: rm -rf app/api
+      - run: rm -rf app/api app/api-docs
       - run: npm run build
         env:
-          STATIC_EXPORT: "1"
           NEXT_PUBLIC_STATIC_EXPORT: "1"
           BASE_PATH: "/${{ github.event.repository.name }}"
       - uses: actions/upload-pages-artifact@v3
