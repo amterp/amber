@@ -1,0 +1,33 @@
+name: Update Highlights Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday at 06:00 UTC
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Generate highlight data
+        run: npm run generate-data
+      - name: Commit and push
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add public/data/highlights/
+          if git diff --cached --quiet; then
+            echo "No new data files"
+          else
+            git commit -m "Update highlights cache data"
+            git push
+          fi

@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -31,6 +32,7 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "1"
+          NEXT_PUBLIC_BASE_PATH: "/${{ github.event.repository.name }}"
           BASE_PATH: "/${{ github.event.repository.name }}"
       - uses: actions/upload-pages-artifact@v3
         with:
