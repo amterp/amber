@@ -3,11 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const links = [
+const isStaticExport = process.env.NEXT_PUBLIC_STATIC_EXPORT === "1";
+
+const allLinks = [
   { href: "/browse", label: "Browse" },
   { href: "/highlights", label: "Highlights" },
   { href: "/api-docs", label: "API Docs" },
 ];
+
+const links = isStaticExport
+  ? allLinks.filter((l) => l.href !== "/api-docs")
+  : allLinks;
 
 export default function NavLinks() {
   const pathname = usePathname();

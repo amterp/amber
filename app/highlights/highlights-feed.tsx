@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import PeriodSection from "./period-section";
+import { searchAlgolia } from "@/lib/algolia";
 import { Submission, Step, Period } from "@/lib/types";
 import { getPeriods, getMorePeriods } from "@/lib/time";
 
@@ -26,18 +27,14 @@ const BATCH_SIZES: Record<Step, number> = {
 };
 
 async function fetchPeriod(period: Period, count: number): Promise<PeriodData> {
-  const params = new URLSearchParams({
+  const data = await searchAlgolia({
     type: "story",
     sort: "points",
-    per_page: String(count),
-    page: "0",
+    per_page: count,
+    page: 0,
     from: String(period.start),
     to: String(period.end),
   });
-
-  const res = await fetch(`/api/search?${params.toString()}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
 
   return {
     label: period.label,

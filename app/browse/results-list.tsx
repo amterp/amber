@@ -3,7 +3,8 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import SubmissionCard from "@/components/submission-card";
-import { Submission, TimeRange } from "@/lib/types";
+import { searchAlgolia } from "@/lib/algolia";
+import { Submission, SearchParams, TimeRange } from "@/lib/types";
 import { getTimeRangeTimestamp } from "@/lib/time";
 
 interface FetchState {
@@ -25,28 +26,29 @@ export default function ResultsList() {
   });
   const [retryKey, setRetryKey] = useState(0);
 
-  const buildApiUrl = useCallback(
-    (page: number) => {
-      const params = new URLSearchParams();
+  const buildSearchParams = useCallback(
+    (page: number): SearchParams => {
       const range = (searchParams.get("range") as TimeRange) || "7d";
       const type = searchParams.get("type") || "story";
 
-      params.set("type", type);
-      params.set("sort", "points");
-      params.set("page", String(page));
-      params.set("per_page", "30");
+      const params: SearchParams = {
+        type,
+        sort: "points",
+        page,
+        per_page: 30,
+      };
 
       if (range === "custom") {
         const from = searchParams.get("from");
         const to = searchParams.get("to");
-        if (from) params.set("from", from);
-        if (to) params.set("to", to);
+        if (from) params.from = from;
+        if (to) params.to = to;
       } else {
         const timestamp = getTimeRangeTimestamp(range);
-        params.set("from", String(timestamp));
+        params.from = String(timestamp);
       }
 
-      return `/api/search?${params.toString()}`;
+      return params;
     },
     [searchParams],
   );
@@ -57,9 +59,7 @@ export default function ResultsList() {
     async function load() {
       setState({ hits: [], loading: true, hasMore: false, page: 0, error: null });
       try {
-        const res = await fetch(buildApiUrl(0));
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        const data = await searchAlgolia(buildSearchParams(0));
         if (!cancelled) {
           setState({
             hits: data.hits,
@@ -80,15 +80,13 @@ export default function ResultsList() {
     return () => {
       cancelled = true;
     };
-  }, [buildApiUrl, retryKey]);
+  }, [buildSearchParams, retryKey]);
 
   const loadMore = async () => {
     const nextPage = state.page + 1;
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
-      const res = await fetch(buildApiUrl(nextPage));
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await searchAlgolia(buildSearchParams(nextPage));
       setState((s) => ({
         hits: [...s.hits, ...data.hits],
         loading: false,
