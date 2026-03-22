@@ -24,6 +24,8 @@ import { dateCacheKey } from "../lib/highlights";
 
 const DATA_DIR = path.resolve(__dirname, "../public/data/highlights");
 const INDEX_PATH = path.join(DATA_DIR, "index.json");
+// Starting from 2020 keeps the initial data set manageable (~1,900
+// files). Can be pushed back to 2007-02-19 (HN launch) if needed.
 const START_DATE = "2020-01-01";
 const CUTOFF_DAYS = 30;
 const DELAY_MS = 100;
@@ -154,7 +156,8 @@ async function main(): Promise<void> {
     (skippedByCap > 0 ? `, ${skippedByCap} deferred (cap)` : ""),
   );
 
-  let fetched = 0;
+  let newFetched = 0;
+  let refreshed = 0;
   let failed = 0;
 
   for (const entry of capped) {
@@ -164,6 +167,9 @@ async function main(): Promise<void> {
     const toTimestampSec = fromTimestampSec + 86400;
 
     try {
+      // 50 matches the UI's max count option. For weekly/monthly views
+      // these are merged across days (7x50=350 or 30x50=1500 candidates),
+      // so the pool is large enough to produce accurate top-N results.
       const data = await searchAlgolia({
         type: "story",
         sort: "points",
@@ -176,10 +182,12 @@ async function main(): Promise<void> {
       const filePath = path.join(DATA_DIR, `${entry.date}.json`);
       await writeFile(filePath, JSON.stringify(data.hits), "utf-8");
       index[entry.date] = nowSec;
-      fetched++;
+      if (entry.isNew) newFetched++;
+      else refreshed++;
 
-      if (fetched % 50 === 0) {
-        console.log(`  Fetched ${fetched}/${capped.length}...`);
+      const done = newFetched + refreshed;
+      if (done % 50 === 0) {
+        console.log(`  Fetched ${done}/${capped.length}...`);
       }
 
       await sleep(DELAY_MS);
@@ -194,8 +202,8 @@ async function main(): Promise<void> {
   console.log(`\nWrote index.json with ${Object.keys(index).length} entries`);
 
   console.log(
-    `Done: ${newCount > 0 ? `${fetched - refreshCount + failed} new, ` : ""}` +
-    `${refreshCount - failed} refreshed, ${freshCount} fresh, ${failed} failed`,
+    `Done: ${newFetched} new, ${refreshed} refreshed, ` +
+    `${freshCount} fresh, ${failed} failed`,
   );
 }
 

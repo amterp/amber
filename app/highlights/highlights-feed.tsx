@@ -40,7 +40,10 @@ function loadIndex(): Promise<Set<string>> {
           new Set(Object.keys(data)),
         );
       })
-      .catch(() => new Set<string>());
+      .catch(() => {
+        cachedIndexPromise = null;
+        return new Set<string>();
+      });
   }
   return cachedIndexPromise;
 }
@@ -121,7 +124,7 @@ async function fetchBatch(
 export default function HighlightsFeed() {
   const searchParams = useSearchParams();
   const step = (searchParams.get("step") as Step) || "monthly";
-  const count = Number(searchParams.get("count")) || 20;
+  const count = Math.max(1, Number(searchParams.get("count")) || 20);
 
   const [state, setState] = useState<FeedState>({
     periods: [],
