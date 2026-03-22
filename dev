@@ -1,0 +1,46 @@
+#!/usr/bin/env rad
+---
+Dev automation for the Amber project.
+---
+
+args:
+    dev d bool        # Start the Next.js dev server
+    build b bool      # Production build
+    lint l bool       # Run ESLint
+    typecheck t bool  # Run TypeScript type checking
+    clean c bool      # Remove .next and node_modules
+    install i bool    # Install npm dependencies
+    all a bool        # Run lint, typecheck, and build
+
+if all:
+    lint = true
+    typecheck = true
+    build = true
+
+if not dev and not build and not lint and not typecheck and not clean and not install:
+    print("No flags specified. Run with --help to see options.")
+    exit(1)
+
+if clean:
+    print("Cleaning build artifacts...")
+    $`rm -rf .next node_modules`
+
+if install:
+    print("Installing dependencies...")
+    $`npm install`
+
+if lint:
+    print("Linting...")
+    $`npm run lint`
+
+if typecheck:
+    print("Type checking...")
+    $`npx tsc --noEmit`
+
+if build:
+    print("Building...")
+    $`npm run build`
+
+if dev:
+    print("Starting dev server...")
+    $`npx next dev --webpack`

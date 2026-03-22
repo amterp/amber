@@ -1,72 +1,72 @@
-default_column = "backlog-lo"
-id = "b_kjp8H7j6"
 kan_schema = "board/9"
+id = "b_kjp8H7j6"
 name = "main"
+default_column = "backlog-lo"
+
+[[columns]]
+  name = "backlog-lo"
+  color = "#6b7280"
+  description = "Low priority planned work"
+  limit = 0
+
+[[columns]]
+  name = "backlog-hi"
+  color = "#3b82f6"
+  description = "High priority planned work"
+  limit = 10
+
+[[columns]]
+  name = "next"
+  color = "#f59e0b"
+  description = "Ready to be picked up next"
+  limit = 5
+  card_ids = ["a_kjuUKgqC", "a_kjycnUrT", "a_kkDQM1UX"]
+
+[[columns]]
+  name = "in-progress"
+  color = "#10b981"
+  description = "Currently being worked on"
+  limit = 3
+  card_ids = ["a_kjxbqY9E"]
+
+[[columns]]
+  name = "done"
+  color = "#9333ea"
+  description = "Completed work"
+  limit = 0
+  card_ids = ["a_kjy2i0vX", "a_kjtujIvS"]
+
+[custom_fields]
+  [custom_fields.type]
+    type = "enum"
+    wanted = true
+    description = "The category of work this card represents"
+
+    [[custom_fields.type.options]]
+      value = "bug"
+      color = "#dc2626"
+      description = "A defect in existing functionality"
+
+    [[custom_fields.type.options]]
+      value = "enhancement"
+      color = "#2563eb"
+      description = "An improvement to existing functionality"
+
+    [[custom_fields.type.options]]
+      value = "feature"
+      color = "#16a34a"
+      description = "New functionality to be added"
+
+    [[custom_fields.type.options]]
+      value = "chore"
+      color = "#4b5563"
+      description = "Maintenance, refactoring, or housekeeping"
 
 [card_display]
   type_indicator = "type"
 
-[[columns]]
-  color = "#6b7280"
-  description = "Low priority planned work"
-  limit = 0
-  name = "backlog-lo"
-
-[[columns]]
-  color = "#3b82f6"
-  description = "High priority planned work"
-  limit = 10
-  name = "backlog-hi"
-
-[[columns]]
-  card_ids = ["a_kjuUKgqC", "a_kjxbqY9E", "a_kjycnUrT", "a_kkDQM1UX"]
-  color = "#f59e0b"
-  description = "Ready to be picked up next"
-  limit = 5
-  name = "next"
-
-[[columns]]
-  card_ids = ["a_kjy2i0vX"]
-  color = "#10b981"
-  description = "Currently being worked on"
-  limit = 3
-  name = "in-progress"
-
-[[columns]]
-  card_ids = ["a_kjtujIvS"]
-  color = "#9333ea"
-  description = "Completed work"
-  limit = 0
-  name = "done"
-
-[custom_fields]
-  [custom_fields.type]
-    description = "The category of work this card represents"
-    type = "enum"
-    wanted = true
-
-    [[custom_fields.type.options]]
-      color = "#dc2626"
-      description = "A defect in existing functionality"
-      value = "bug"
-
-    [[custom_fields.type.options]]
-      color = "#2563eb"
-      description = "An improvement to existing functionality"
-      value = "enhancement"
-
-    [[custom_fields.type.options]]
-      color = "#16a34a"
-      description = "New functionality to be added"
-      value = "feature"
-
-    [[custom_fields.type.options]]
-      color = "#4b5563"
-      description = "Maintenance, refactoring, or housekeeping"
-      value = "chore"
-
 [[pattern_hooks]]
-  command = ".kan/hooks/type-shortcut.rad"
   name = "type-shortcut"
   pattern_title = "![a-zA-Z]+"
+  command = ".kan/hooks/type-shortcut.rad"
   timeout = 0
