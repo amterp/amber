@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="public/logo.png" alt="Amber logo" width="120" />
+</p>
+
 # Amber
 
 A historical discovery tool for Hacker News. If you don't have time to
