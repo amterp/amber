@@ -20,7 +20,7 @@
 import { readFile, writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { searchAlgolia } from "../lib/algolia";
-import { dateCacheKey } from "../lib/highlights";
+import { dateCacheKey } from "../lib/hn-cache";
 
 const DATA_DIR = path.resolve(__dirname, "../public/data/highlights");
 const INDEX_PATH = path.join(DATA_DIR, "index.json");

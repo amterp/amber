@@ -1,11 +1,26 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import SubmissionCard from "@/components/submission-card";
 import { searchAlgolia } from "@/lib/algolia";
-import { Submission, SearchParams, TimeRange } from "@/lib/types";
-import { getTimeRangeTimestamp } from "@/lib/time";
+import { Submission, SearchParams, TimeRange, SubmissionType } from "@/lib/types";
+import { getTimeRangeTimestamp, parseDate } from "@/lib/time";
+import {
+  loadIndex,
+  dayKeysForRange,
+  segmentDayKeys,
+  fetchCachedDays,
+} from "@/lib/hn-cache";
+
+const PER_PAGE = 30;
+
+// Algolia caps hitsPerPage at 100. For uncached gaps we fetch the top 100
+// stories per gap, which is a best-effort approximation. Stories ranked
+// 101+ in a gap are dropped. In practice this rarely matters: gap stories
+// compete against potentially years of cached top stories when sorted
+// globally by points, so they seldom appear on the first several pages.
+const ALGOLIA_GAP_PER_PAGE = 100;
 
 interface FetchState {
   hits: Submission[];
@@ -13,6 +28,92 @@ interface FetchState {
   hasMore: boolean;
   page: number;
   error: string | null;
+}
+
+/** Resolve range/from/to URL params into a timestamp pair. */
+function resolveTimestampRange(
+  searchParams: URLSearchParams,
+): { from: number; to: number } | null {
+  const range = (searchParams.get("range") as TimeRange) || "7d";
+
+  if (range === "custom") {
+    const fromStr = searchParams.get("from");
+    const toStr = searchParams.get("to");
+    if (!fromStr || !toStr) return null;
+    try {
+      return { from: parseDate(fromStr), to: parseDate(toStr) };
+    } catch {
+      return null;
+    }
+  }
+
+  const from = getTimeRangeTimestamp(range);
+  const to = Math.floor(Date.now() / 1000);
+  return { from, to };
+}
+
+/**
+ * Attempt to load browse data using the hybrid cache+Algolia strategy.
+ * Returns a full sorted/filtered array of submissions, or null if the
+ * hybrid path isn't viable (no cached days, too many gaps, etc.).
+ */
+async function loadHybrid(
+  fromSec: number,
+  toSec: number,
+  types: Set<string>,
+): Promise<Submission[] | null> {
+  const index = await loadIndex();
+  const dayKeys = dayKeysForRange(fromSec, toSec);
+  if (dayKeys.length === 0) return null;
+
+  const segments = segmentDayKeys(dayKeys, index);
+  if (!segments) return null;
+
+  // If there are zero cached keys, skip hybrid entirely - let Algolia
+  // handle it with its native pagination.
+  if (segments.cachedKeys.length === 0) return null;
+
+  // Fetch cached days and Algolia gaps in parallel
+  const [cachedSubmissions, ...algoliaResults] = await Promise.all([
+    fetchCachedDays(segments.cachedKeys),
+    ...segments.uncachedRanges.map((range) =>
+      searchAlgolia({
+        type: Array.from(types).join(","),
+        sort: "points",
+        page: 0,
+        per_page: ALGOLIA_GAP_PER_PAGE,
+        from: String(range.from),
+        to: String(range.to),
+      }).then((res) => res.hits),
+    ),
+  ]);
+
+  // Merge and deduplicate by ID
+  const seen = new Set<string>();
+  const merged: Submission[] = [];
+  for (const sub of [...cachedSubmissions, ...algoliaResults.flat()]) {
+    if (!seen.has(sub.id)) {
+      seen.add(sub.id);
+      merged.push(sub);
+    }
+  }
+
+  // Filter to the exact requested time range. Cache files contain full
+  // UTC days, so boundary days may include submissions outside the
+  // user's from/to window.
+  const trimmed = merged.filter(
+    (s) => s.createdAtTimestamp >= fromSec && s.createdAtTimestamp < toSec,
+  );
+
+  // Filter by type
+  const filtered = types.size > 0
+    ? trimmed.filter((s) => types.has(s.type))
+    : trimmed;
+
+  // Sort by points descending
+  filtered.sort((a, b) => b.points - a.points);
+
+  return filtered;
 }
 
 export default function ResultsList() {
@@ -25,27 +126,24 @@ export default function ResultsList() {
     error: null,
   });
   const [retryKey, setRetryKey] = useState(0);
+  const cacheRef = useRef<Submission[] | null>(null);
+  const loadingMoreRef = useRef(false);
 
   const buildSearchParams = useCallback(
     (page: number): SearchParams => {
-      const range = (searchParams.get("range") as TimeRange) || "7d";
+      const tsRange = resolveTimestampRange(searchParams);
       const type = searchParams.get("type") || "story";
 
       const params: SearchParams = {
         type,
         sort: "points",
         page,
-        per_page: 30,
+        per_page: PER_PAGE,
       };
 
-      if (range === "custom") {
-        const from = searchParams.get("from");
-        const to = searchParams.get("to");
-        if (from) params.from = from;
-        if (to) params.to = to;
-      } else {
-        const timestamp = getTimeRangeTimestamp(range);
-        params.from = String(timestamp);
+      if (tsRange) {
+        params.from = String(tsRange.from);
+        params.to = String(tsRange.to);
       }
 
       return params;
@@ -57,7 +155,33 @@ export default function ResultsList() {
     let cancelled = false;
 
     async function load() {
+      cacheRef.current = null;
       setState({ hits: [], loading: true, hasMore: false, page: 0, error: null });
+
+      // Try hybrid cache+Algolia first
+      const tsRange = resolveTimestampRange(searchParams);
+      if (tsRange) {
+        try {
+          const typeParam = searchParams.get("type") || "story";
+          const types = new Set(typeParam.split(",").filter(Boolean) as SubmissionType[]);
+          const hybrid = await loadHybrid(tsRange.from, tsRange.to, types);
+          if (!cancelled && hybrid) {
+            cacheRef.current = hybrid;
+            setState({
+              hits: hybrid.slice(0, PER_PAGE),
+              loading: false,
+              hasMore: hybrid.length > PER_PAGE,
+              page: 0,
+              error: null,
+            });
+            return;
+          }
+        } catch {
+          // Hybrid failed - fall through to Algolia
+        }
+      }
+
+      // Fall back to Algolia
       try {
         const data = await searchAlgolia(buildSearchParams(0));
         if (!cancelled) {
@@ -80,12 +204,32 @@ export default function ResultsList() {
     return () => {
       cancelled = true;
     };
-  }, [buildSearchParams, retryKey]);
+  }, [buildSearchParams, retryKey, searchParams]);
 
   const loadMore = async () => {
-    const nextPage = state.page + 1;
-    setState((s) => ({ ...s, loading: true, error: null }));
+    if (loadingMoreRef.current) return;
+    loadingMoreRef.current = true;
+
     try {
+      const nextPage = state.page + 1;
+
+      // Paginate from cached hybrid data - no network request
+      const cached = cacheRef.current;
+      if (cached) {
+        const start = nextPage * PER_PAGE;
+        const nextHits = cached.slice(start, start + PER_PAGE);
+        setState((s) => ({
+          hits: [...s.hits, ...nextHits],
+          loading: false,
+          hasMore: start + PER_PAGE < cached.length,
+          page: nextPage,
+          error: null,
+        }));
+        return;
+      }
+
+      // Algolia pagination
+      setState((s) => ({ ...s, loading: true, error: null }));
       const data = await searchAlgolia(buildSearchParams(nextPage));
       setState((s) => ({
         hits: [...s.hits, ...data.hits],
@@ -96,6 +240,8 @@ export default function ResultsList() {
       }));
     } catch (err) {
       setState((s) => ({ ...s, loading: false, error: (err as Error).message }));
+    } finally {
+      loadingMoreRef.current = false;
     }
   };
 

@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, useCallback } from "react";
 import PeriodSection from "./period-section";
 import { searchAlgolia } from "@/lib/algolia";
-import { dayKeysForPeriod, dateCacheUrl } from "@/lib/highlights";
+import { dayKeysForPeriod, fetchCachedDays, loadIndex } from "@/lib/hn-cache";
 import { Submission, Step, Period } from "@/lib/types";
 import { getPeriods, getMorePeriods } from "@/lib/time";
 
@@ -27,27 +27,6 @@ const BATCH_SIZES: Record<Step, number> = {
   daily: 7,
 };
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
-
-let cachedIndexPromise: Promise<Set<string>> | null = null;
-
-function loadIndex(): Promise<Set<string>> {
-  if (!cachedIndexPromise) {
-    cachedIndexPromise = fetch(`${basePath}/data/highlights/index.json`)
-      .then((res) => {
-        if (!res.ok) return new Set<string>();
-        return res.json().then((data: Record<string, number>) =>
-          new Set(Object.keys(data)),
-        );
-      })
-      .catch(() => {
-        cachedIndexPromise = null;
-        return new Set<string>();
-      });
-  }
-  return cachedIndexPromise;
-}
-
 async function fetchFromCache(
   period: Period,
   count: number,
@@ -60,16 +39,7 @@ async function fetchFromCache(
     return null;
   }
 
-  const responses = await Promise.all(
-    dayKeys.map((key) =>
-      fetch(`${basePath}${dateCacheUrl(key)}`).then((res) => {
-        if (!res.ok) throw new Error(`Cache miss: ${key}`);
-        return res.json() as Promise<Submission[]>;
-      }),
-    ),
-  );
-
-  const merged = responses.flat();
+  const merged = await fetchCachedDays(dayKeys);
   merged.sort((a, b) => b.points - a.points);
 
   return {
