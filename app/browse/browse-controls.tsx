@@ -10,7 +10,7 @@ export default function BrowseControls() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const timeRange = (searchParams.get("range") as TimeRange) || "7d";
+  const timeRange = (searchParams.get("range") as TimeRange) || "hot";
   const customFrom = searchParams.get("from") || "";
   const customTo = searchParams.get("to") || "";
   const typesParam = searchParams.get("type") || "story";
@@ -35,6 +35,8 @@ export default function BrowseControls() {
   const handleTimeRange = (range: TimeRange) => {
     if (range === "custom") {
       updateParams({ range: "custom" });
+    } else if (range === "hot") {
+      updateParams({ range, from: null, to: null, type: null });
     } else {
       updateParams({ range, from: null, to: null });
     }
@@ -62,7 +64,9 @@ export default function BrowseControls() {
           onCustomFromChange={(v) => updateParams({ from: v })}
           onCustomToChange={(v) => updateParams({ to: v })}
         />
-        <TypeFilter selected={selectedTypes} onToggle={handleTypeToggle} />
+        {timeRange !== "hot" && (
+          <TypeFilter selected={selectedTypes} onToggle={handleTypeToggle} />
+        )}
       </div>
     </div>
   );

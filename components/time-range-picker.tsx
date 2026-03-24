@@ -12,6 +12,7 @@ interface Props {
 }
 
 const PRESETS: { label: string; value: TimeRange }[] = [
+  { label: "Hot", value: "hot" },
   { label: "24h", value: "24h" },
   { label: "7d", value: "7d" },
   { label: "30d", value: "30d" },

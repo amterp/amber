@@ -38,7 +38,7 @@ export type SubmissionType = (typeof VALID_TYPES)[number];
 
 export type SortOrder = "points" | "date";
 
-export type TimeRange = "24h" | "7d" | "30d" | "1y" | "custom";
+export type TimeRange = "hot" | "24h" | "7d" | "30d" | "1y" | "custom";
 
 export type Step = "daily" | "weekly" | "monthly";
 

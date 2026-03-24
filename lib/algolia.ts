@@ -43,6 +43,29 @@ function transformHit(hit: AlgoliaHit): Submission {
   };
 }
 
+export async function fetchFrontPage(page: number = 0, perPage: number = 30): Promise<SearchResponse> {
+  const queryParams = new URLSearchParams();
+  queryParams.set("tags", "front_page");
+  queryParams.set("hitsPerPage", String(Math.min(Math.max(perPage, 1), 100)));
+  queryParams.set("page", String(page));
+
+  const url = `${ALGOLIA_BASE}/search?${queryParams.toString()}`;
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    throw new Error(`Algolia API error: ${res.status} ${res.statusText}`);
+  }
+
+  const data: AlgoliaResponse = await res.json();
+
+  return {
+    hits: data.hits.map(transformHit),
+    total_hits: data.nbHits,
+    page: data.page,
+    total_pages: data.nbPages,
+  };
+}
+
 export async function searchAlgolia(params: SearchParams): Promise<SearchResponse> {
   const sort = params.sort || "points";
   const endpoint = sort === "date" ? "search_by_date" : "search";

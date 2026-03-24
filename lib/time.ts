@@ -3,6 +3,8 @@ import { TimeRange, Step, Period } from "./types";
 export function getTimeRangeTimestamp(range: TimeRange): number {
   const now = Math.floor(Date.now() / 1000);
   switch (range) {
+    case "hot":
+      throw new Error("getTimeRangeTimestamp is not valid for 'hot'");
     case "24h":
       return now - 86400;
     case "7d":

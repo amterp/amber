@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
 import SubmissionCard from "@/components/submission-card";
-import { searchAlgolia } from "@/lib/algolia";
+import { searchAlgolia, fetchFrontPage } from "@/lib/algolia";
 import { Submission, SearchParams, TimeRange, SubmissionType } from "@/lib/types";
 import { getTimeRangeTimestamp, parseDate } from "@/lib/time";
 import {
@@ -34,7 +34,9 @@ interface FetchState {
 function resolveTimestampRange(
   searchParams: URLSearchParams,
 ): { from: number; to: number } | null {
-  const range = (searchParams.get("range") as TimeRange) || "7d";
+  const range = (searchParams.get("range") as TimeRange) || "hot";
+
+  if (range === "hot") return null;
 
   if (range === "custom") {
     const fromStr = searchParams.get("from");
@@ -158,6 +160,29 @@ export default function ResultsList() {
       cacheRef.current = null;
       setState({ hits: [], loading: true, hasMore: false, page: 0, error: null });
 
+      const range = (searchParams.get("range") as TimeRange) || "hot";
+
+      // Hot mode - fetch current HN front page
+      if (range === "hot") {
+        try {
+          const data = await fetchFrontPage(0, PER_PAGE);
+          if (!cancelled) {
+            setState({
+              hits: data.hits,
+              loading: false,
+              hasMore: data.page < data.total_pages - 1,
+              page: 0,
+              error: null,
+            });
+          }
+        } catch (err) {
+          if (!cancelled) {
+            setState((s) => ({ ...s, loading: false, error: (err as Error).message }));
+          }
+        }
+        return;
+      }
+
       // Try hybrid cache+Algolia first
       const tsRange = resolveTimestampRange(searchParams);
       if (tsRange) {
@@ -212,6 +237,21 @@ export default function ResultsList() {
 
     try {
       const nextPage = state.page + 1;
+      const range = (searchParams.get("range") as TimeRange) || "hot";
+
+      // Hot mode pagination
+      if (range === "hot") {
+        setState((s) => ({ ...s, loading: true, error: null }));
+        const data = await fetchFrontPage(nextPage, PER_PAGE);
+        setState((s) => ({
+          hits: [...s.hits, ...data.hits],
+          loading: false,
+          hasMore: data.page < data.total_pages - 1,
+          page: nextPage,
+          error: null,
+        }));
+        return;
+      }
 
       // Paginate from cached hybrid data - no network request
       const cached = cacheRef.current;
