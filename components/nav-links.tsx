@@ -23,21 +23,21 @@ export default function NavLinks() {
         <Link
           key={href}
           href={href}
-          className={
+          className={`${
             pathname === href
               ? "text-white underline underline-offset-4"
               : "text-orange-100 hover:text-white transition-colors"
-          }
+          }${href === "/api-docs" ? " hidden sm:inline" : ""}`}
         >
           {label}
         </Link>
       ))}
-      <span className="text-orange-300 dark:text-orange-400">|</span>
+      <span className="hidden sm:inline text-orange-300 dark:text-orange-400">|</span>
       <a
         href="https://hn.algolia.com/api"
         target="_blank"
         rel="noopener noreferrer"
-        className="text-xs text-orange-200 hover:text-white transition-colors dark:text-orange-300"
+        className="hidden sm:inline text-xs text-orange-200 hover:text-white transition-colors dark:text-orange-300"
       >
         Powered by Algolia
       </a>

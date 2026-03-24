@@ -29,24 +29,26 @@ export default function TimeRangePicker({
   onCustomToChange,
 }: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs font-medium text-gray-500 uppercase tracking-wide dark:text-gray-400">Time</span>
-      {PRESETS.map((preset) => (
-        <button
-          key={preset.value}
-          onClick={() => onSelect(preset.value)}
-          aria-pressed={selected === preset.value}
-          className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
-            selected === preset.value
-              ? "bg-orange-500 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-          }`}
-        >
-          {preset.label}
-        </button>
-      ))}
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto">
+        <span className="shrink-0 text-xs font-medium text-gray-500 uppercase tracking-wide dark:text-gray-400">Time</span>
+        {PRESETS.map((preset) => (
+          <button
+            key={preset.value}
+            onClick={() => onSelect(preset.value)}
+            aria-pressed={selected === preset.value}
+            className={`shrink-0 rounded-full px-2 sm:px-3 py-1 text-sm font-medium transition-colors ${
+              selected === preset.value
+                ? "bg-orange-500 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            }`}
+          >
+            {preset.label}
+          </button>
+        ))}
+      </div>
       {selected === "custom" && (
-        <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-1">
+        <div className="flex items-center gap-2">
           <input
             type="date"
             value={customFrom}
