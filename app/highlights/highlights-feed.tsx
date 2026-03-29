@@ -11,6 +11,7 @@ import { getPeriods, getMorePeriods } from "@/lib/time";
 interface PeriodData {
   label: string;
   submissions: Submission[];
+  inProgress?: boolean;
 }
 
 interface FeedState {
@@ -56,7 +57,7 @@ async function fetchPeriod(
   // Try cache first
   try {
     const cached = await fetchFromCache(period, count, index);
-    if (cached) return cached;
+    if (cached) return { ...cached, inProgress: period.inProgress };
   } catch {
     // Cache fetch failed - fall through to live API
   }
@@ -73,6 +74,7 @@ async function fetchPeriod(
   return {
     label: period.label,
     submissions: data.hits,
+    inProgress: period.inProgress,
   };
 }
 
@@ -87,7 +89,7 @@ async function fetchBatch(
 
   return results.map((result, i) => {
     if (result.status === "fulfilled") return result.value;
-    return { label: periods[i].label, submissions: [] };
+    return { label: periods[i].label, submissions: [], inProgress: periods[i].inProgress };
   });
 }
 
@@ -186,6 +188,8 @@ export default function HighlightsFeed() {
           key={`${period.label}-${i}`}
           title={period.label}
           submissions={period.submissions}
+          inProgress={period.inProgress}
+          step={step}
         />
       ))}
 

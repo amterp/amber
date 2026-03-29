@@ -43,9 +43,10 @@ export type TimeRange = "hot" | "24h" | "7d" | "30d" | "1y" | "custom";
 export type Step = "daily" | "weekly" | "monthly";
 
 export interface Period {
-  start: number; // Unix timestamp (seconds)
-  end: number;   // Unix timestamp (seconds)
+  start: number;        // Unix timestamp (seconds)
+  end: number;          // Unix timestamp (seconds)
   label: string;
+  inProgress?: boolean;
 }
 
 export interface SearchParams {

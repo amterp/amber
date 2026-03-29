@@ -60,7 +60,7 @@ export function formatMonthYear(year: number, month: number): string {
   return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
-function formatPeriodLabel(start: Date, step: Step): string {
+function formatPeriodLabel(start: Date, step: Step, inProgress?: boolean): string {
   if (step === "monthly") {
     return start.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
   }
@@ -72,6 +72,12 @@ function formatPeriodLabel(start: Date, step: Step): string {
       year: "numeric",
       timeZone: "UTC",
     });
+  }
+  // weekly in-progress: "Mar 23 - Present"
+  if (inProgress) {
+    const startMonth = start.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
+    const startDay = start.getUTCDate();
+    return `${startMonth} ${startDay} - Present`;
   }
   // weekly: "Mar 10 - 16, 2025" or "Mar 31 - Apr 6, 2025" when spanning months
   const end = new Date(start.getTime() + 6 * 86400 * 1000);
@@ -88,13 +94,15 @@ function formatPeriodLabel(start: Date, step: Step): string {
 
 /**
  * Generate periods going backward in time.
- * Returns `count` periods ending before `before` (defaults to start of current period).
+ * When `includeCurrent` is true (default), the first period is the current
+ * in-progress period. The remaining `count - 1` periods are completed ones.
+ * When false, all `count` periods are completed (used by getMorePeriods).
  */
-export function getPeriods(step: Step, count: number, before?: Date): Period[] {
+export function getPeriods(step: Step, count: number, before?: Date, includeCurrent: boolean = true): Period[] {
   const periods: Period[] = [];
   const anchor = before ?? new Date();
 
-  // Start from the beginning of the current period (exclusive - we skip it since it's incomplete)
+  // Start from the beginning of the current period
   let cursor: Date;
   if (step === "monthly") {
     cursor = new Date(Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), 1));
@@ -109,7 +117,27 @@ export function getPeriods(step: Step, count: number, before?: Date): Period[] {
     cursor = new Date(Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), anchor.getUTCDate()));
   }
 
-  for (let i = 0; i < count; i++) {
+  // Include the current in-progress period as the first entry
+  if (includeCurrent) {
+    let periodEnd: Date;
+    if (step === "monthly") {
+      periodEnd = new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth() + 1, 1));
+    } else if (step === "weekly") {
+      periodEnd = new Date(cursor.getTime() + 7 * 86400 * 1000);
+    } else {
+      periodEnd = new Date(cursor.getTime() + 86400 * 1000);
+    }
+
+    periods.push({
+      start: Math.floor(cursor.getTime() / 1000),
+      end: Math.floor(periodEnd.getTime() / 1000),
+      label: formatPeriodLabel(cursor, step, true),
+      inProgress: true,
+    });
+  }
+
+  const remaining = includeCurrent ? count - 1 : count;
+  for (let i = 0; i < remaining; i++) {
     // Step backward
     let periodStart: Date;
     if (step === "monthly") {
@@ -144,8 +172,9 @@ export function getPeriods(step: Step, count: number, before?: Date): Period[] {
 /**
  * Generate the next batch of periods continuing from a cursor timestamp.
  * The cursor should be the `start` of the last loaded period.
+ * Never includes the current period (that's only in the initial load).
  */
 export function getMorePeriods(step: Step, count: number, cursorTimestamp: number): Period[] {
   const cursorDate = new Date(cursorTimestamp * 1000);
-  return getPeriods(step, count, cursorDate);
+  return getPeriods(step, count, cursorDate, false);
 }

@@ -17,7 +17,7 @@ export default function HighlightsPage() {
           Highlights
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-          Top stories by time period, ranked by points.
+          Top stories by time period, ranked by points. Period boundaries are UTC.
         </p>
         <Suspense fallback={<LoadingSkeleton />}>
           <HighlightsFeed />
