@@ -23,11 +23,10 @@ export function parseDate(input: string): number {
   if (!isNaN(asNumber) && asNumber > 1e9) {
     return Math.floor(asNumber);
   }
-  // Date-only strings (YYYY-MM-DD) are parsed as UTC midnight by the JS spec,
-  // which shifts the boundary in non-UTC timezones. Appending T00:00:00 forces
-  // local-time interpretation, matching what a user selecting a date expects.
-  const normalized = /^\d{4}-\d{2}-\d{2}$/.test(input) ? `${input}T00:00:00` : input;
-  const date = new Date(normalized);
+  // Date-only strings (YYYY-MM-DD) are parsed as UTC midnight by the JS spec.
+  // We keep this behavior so custom browse ranges use the same UTC boundaries
+  // as highlights periods.
+  const date = new Date(input);
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid date: ${input}`);
   }
