@@ -39,6 +39,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Amber ships its own dark theme. Dark Reader layered on top flattens
+            the orange brand color to gray and washes out the comment rails, so
+            tell it to stand down. */}
+        <meta name="darkreader-lock" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="min-h-full flex flex-col font-sans">

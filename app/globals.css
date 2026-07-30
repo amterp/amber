@@ -5,6 +5,24 @@
 :root {
   --background: #fafafa;
   --foreground: #171717;
+
+  /* Clears the sticky nav (48) + item header (52) + ancestor bar (36), so a
+     comment scrolled to via keyboard, rail or #hash lands below them. */
+  --hn-scroll-offset: 140px;
+
+  /* Indent rail widths. Threads reach depth 21, so a single step would leave no
+     room for text; rails get thinner as they get deeper. */
+  --rail-1: 12px; /* levels 0-5   */
+  --rail-2: 7px; /* levels 6-11  */
+  --rail-3: 4px; /* levels 12+   */
+}
+
+@media (min-width: 640px) {
+  :root {
+    --rail-1: 18px;
+    --rail-2: 11px;
+    --rail-3: 6px;
+  }
 }
 
 .dark {
@@ -22,4 +40,58 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* Comment bodies, rendered from HN's own HTML. See lib/comment-html.ts for what
+   that markup actually looks like. Styled here rather than with utility classes
+   because we don't control the elements. */
+.hn-text {
+  overflow-wrap: anywhere; /* HN posts bare 200-character URLs */
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.hn-text p {
+  margin-top: 0.7em;
+}
+
+.hn-text p:first-child {
+  margin-top: 0;
+}
+
+/* HN writes "<p><pre>", and the parser auto-closes the paragraph, leaving an
+   empty one behind. */
+.hn-text p:empty {
+  display: none;
+}
+
+.hn-text a {
+  @apply text-orange-600 underline dark:text-orange-400;
+  text-underline-offset: 2px;
+}
+
+.hn-text pre {
+  @apply bg-gray-100 dark:bg-gray-800;
+  margin-top: 0.7em;
+  overflow-x: auto; /* only contains itself because the row's content column is min-w-0 */
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.hn-text code {
+  @apply font-mono;
+}
+
+.hn-text i {
+  font-style: italic;
+}
+
+.hn-text .hn-quote {
+  @apply border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-400;
+  border-left-width: 2px;
+  border-left-style: solid;
+  padding-left: 0.625rem;
+  font-style: italic;
 }

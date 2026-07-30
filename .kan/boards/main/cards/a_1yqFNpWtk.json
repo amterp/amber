@@ -1,0 +1,18 @@
+{
+  "_v": 3,
+  "alias": "thread-model-flatten",
+  "alias_explicit": false,
+  "column": "done",
+  "created_at_millis": 1785377251856,
+  "creator": "Alexander Terp",
+  "id": "a_1yqFNpWtk",
+  "position": "u8UU",
+  "title": "thread model: flatten + navigation + tests",
+  "type": "feature",
+  "updated_at_millis": 1785377623280,
+  "history": [
+    {"field":"column","value":"next","at":1785377251856},
+    {"field":"column","value":"in-progress","at":1785377269518},
+    {"field":"column","value":"done","at":1785377623280}
+  ]
+}

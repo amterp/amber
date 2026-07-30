@@ -1,5 +1,6 @@
-import { AlgoliaResponse, AlgoliaHit, Submission, SubmissionType, SearchParams, SearchResponse } from "./types";
+import { AlgoliaResponse, AlgoliaHit, HnItemNode, Submission, SubmissionType, SearchParams, SearchResponse } from "./types";
 import { parseDate } from "./time";
+import { extractDomain } from "./url";
 
 const ALGOLIA_BASE = "https://hn.algolia.com/api/v1";
 
@@ -8,16 +9,6 @@ function buildTags(types: string): string {
   if (tags.length === 0) return "story";
   if (tags.length === 1) return tags[0];
   return `(${tags.join(",")})`;
-}
-
-function extractDomain(url: string | null): string | null {
-  if (!url) return null;
-  try {
-    const hostname = new URL(url).hostname;
-    return hostname.replace(/^www\./, "");
-  } catch {
-    return null;
-  }
 }
 
 function detectType(tags: string[]): SubmissionType {
@@ -64,6 +55,32 @@ export async function fetchFrontPage(page: number = 0, perPage: number = 30): Pr
     page: data.page,
     total_pages: data.nbPages,
   };
+}
+
+export class ItemNotFoundError extends Error {
+  constructor(public readonly id: string) {
+    super(`HN item ${id} not found`);
+    this.name = "ItemNotFoundError";
+  }
+}
+
+/**
+ * Fetch a whole discussion tree in one request. Algolia nests every descendant
+ * under `children`, so this is the only call a thread view needs - which is what
+ * makes the feature possible with no server. Note the response is uncompressed;
+ * the largest threads are ~2 MB.
+ */
+export async function fetchItem(id: string | number, signal?: AbortSignal): Promise<HnItemNode> {
+  const res = await fetch(`${ALGOLIA_BASE}/items/${encodeURIComponent(String(id))}`, { signal });
+
+  if (res.status === 404) {
+    throw new ItemNotFoundError(String(id));
+  }
+  if (!res.ok) {
+    throw new Error(`Algolia API error: ${res.status} ${res.statusText}`);
+  }
+
+  return (await res.json()) as HnItemNode;
 }
 
 export async function searchAlgolia(params: SearchParams): Promise<SearchResponse> {

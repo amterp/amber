@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import PeriodSection from "./period-section";
 import { searchAlgolia } from "@/lib/algolia";
 import { dayKeysForPeriod, fetchCachedDays, loadIndex } from "@/lib/hn-cache";
+import { rememberSubmissions } from "@/lib/seen-store";
 import { Submission, Step, Period } from "@/lib/types";
 import { getPeriods, getMorePeriods } from "@/lib/time";
 
@@ -87,10 +88,15 @@ async function fetchBatch(
     periods.map((p) => fetchPeriod(p, count, index)),
   );
 
-  return results.map((result, i) => {
+  const batch = results.map((result, i) => {
     if (result.status === "fulfilled") return result.value;
     return { label: periods[i].label, submissions: [], inProgress: periods[i].inProgress };
   });
+
+  // Lets /item paint its header instantly when you open one of these.
+  rememberSubmissions(batch.flatMap((p) => p.submissions));
+
+  return batch;
 }
 
 export default function HighlightsFeed() {

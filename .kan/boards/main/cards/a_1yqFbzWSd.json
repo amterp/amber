@@ -1,0 +1,16 @@
+{
+  "_v": 3,
+  "alias": "iframe-embed",
+  "alias_explicit": false,
+  "column": "backlog-lo",
+  "created_at_millis": 1785377260638,
+  "creator": "Alexander Terp",
+  "id": "a_1yqFbzWSd",
+  "position": "UU",
+  "title": "iframe embed blocklist needs periodic review",
+  "type": "chore",
+  "updated_at_millis": 1785377260742,
+  "history": [
+    {"field":"column","value":"backlog-lo","at":1785377260638}
+  ]
+}

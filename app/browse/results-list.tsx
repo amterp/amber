@@ -1,9 +1,11 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useLayoutEffect, useRef } from "react";
 import SubmissionCard from "@/components/submission-card";
 import { searchAlgolia, fetchFrontPage } from "@/lib/algolia";
+import { browseKey, readBrowse, writeBrowse } from "@/lib/browse-store";
+import { rememberSubmissions } from "@/lib/seen-store";
 import { Submission, SearchParams, TimeRange, SubmissionType } from "@/lib/types";
 import { getTimeRangeTimestamp, parseDate } from "@/lib/time";
 import {
@@ -120,16 +122,57 @@ async function loadHybrid(
 
 export default function ResultsList() {
   const searchParams = useSearchParams();
-  const [state, setState] = useState<FetchState>({
-    hits: [],
-    loading: true,
-    hasMore: false,
-    page: 0,
-    error: null,
+  const key = browseKey(searchParams);
+
+  // The lazy initializer has to consult the snapshot. Without it the first paint
+  // is a zero-height "Loading...", and scroll restoration then has nothing to
+  // restore against no matter what else we do.
+  const [state, setState] = useState<FetchState>(() => {
+    const snapshot = readBrowse(key);
+    return snapshot
+      ? {
+          hits: snapshot.hits,
+          loading: false,
+          hasMore: snapshot.hasMore,
+          page: snapshot.page,
+          error: null,
+        }
+      : { hits: [], loading: true, hasMore: false, page: 0, error: null };
   });
   const [retryKey, setRetryKey] = useState(0);
   const cacheRef = useRef<Submission[] | null>(null);
   const loadingMoreRef = useRef(false);
+
+  // Mirrors state for the unmount write, which would otherwise see a stale
+  // closure and persist whatever was on screen several renders ago.
+  const latest = useRef({ key, state, all: cacheRef.current });
+  useEffect(() => {
+    latest.current = { key, state, all: cacheRef.current };
+  });
+
+  useEffect(() => {
+    return () => {
+      const { key: k, state: s, all } = latest.current;
+      if (s.hits.length === 0) return;
+      writeBrowse({
+        key: k,
+        all,
+        hits: s.hits,
+        page: s.page,
+        hasMore: s.hasMore,
+        scrollY: window.scrollY,
+      });
+    };
+  }, []);
+
+  // Restore position only when we actually arrived with a snapshot, so a fresh
+  // navigation still starts at the top.
+  const restoreTo = useRef<number | null>(readBrowse(key)?.scrollY ?? null);
+  useLayoutEffect(() => {
+    const y = restoreTo.current;
+    restoreTo.current = null;
+    if (y != null && y > 0) window.scrollTo(0, y);
+  }, []);
 
   const buildSearchParams = useCallback(
     (page: number): SearchParams => {
@@ -157,6 +200,23 @@ export default function ResultsList() {
     let cancelled = false;
 
     async function load() {
+      // Coming back from a thread: restore rather than refetch. Safe to do
+      // unconditionally, because a retry only reaches here from an error state
+      // and an error state can't coexist with a stored snapshot.
+      const snapshot = readBrowse(key);
+      if (snapshot) {
+        cacheRef.current = snapshot.all;
+        setState({
+          hits: snapshot.hits,
+          loading: false,
+          hasMore: snapshot.hasMore,
+          page: snapshot.page,
+          error: null,
+        });
+        rememberSubmissions(snapshot.hits);
+        return;
+      }
+
       cacheRef.current = null;
       setState({ hits: [], loading: true, hasMore: false, page: 0, error: null });
 
@@ -167,6 +227,7 @@ export default function ResultsList() {
         try {
           const data = await fetchFrontPage(0, PER_PAGE);
           if (!cancelled) {
+            rememberSubmissions(data.hits);
             setState({
               hits: data.hits,
               loading: false,
@@ -192,6 +253,7 @@ export default function ResultsList() {
           const hybrid = await loadHybrid(tsRange.from, tsRange.to, types);
           if (!cancelled && hybrid) {
             cacheRef.current = hybrid;
+            rememberSubmissions(hybrid.slice(0, PER_PAGE));
             setState({
               hits: hybrid.slice(0, PER_PAGE),
               loading: false,
@@ -210,6 +272,7 @@ export default function ResultsList() {
       try {
         const data = await searchAlgolia(buildSearchParams(0));
         if (!cancelled) {
+          rememberSubmissions(data.hits);
           setState({
             hits: data.hits,
             loading: false,
@@ -229,7 +292,7 @@ export default function ResultsList() {
     return () => {
       cancelled = true;
     };
-  }, [buildSearchParams, retryKey, searchParams]);
+  }, [buildSearchParams, key, retryKey, searchParams]);
 
   const loadMore = async () => {
     if (loadingMoreRef.current) return;
@@ -243,6 +306,7 @@ export default function ResultsList() {
       if (range === "hot") {
         setState((s) => ({ ...s, loading: true, error: null }));
         const data = await fetchFrontPage(nextPage, PER_PAGE);
+        rememberSubmissions(data.hits);
         setState((s) => ({
           hits: [...s.hits, ...data.hits],
           loading: false,
@@ -258,6 +322,7 @@ export default function ResultsList() {
       if (cached) {
         const start = nextPage * PER_PAGE;
         const nextHits = cached.slice(start, start + PER_PAGE);
+        rememberSubmissions(nextHits);
         setState((s) => ({
           hits: [...s.hits, ...nextHits],
           loading: false,
@@ -271,6 +336,7 @@ export default function ResultsList() {
       // Algolia pagination
       setState((s) => ({ ...s, loading: true, error: null }));
       const data = await searchAlgolia(buildSearchParams(nextPage));
+      rememberSubmissions(data.hits);
       setState((s) => ({
         hits: [...s.hits, ...data.hits],
         loading: false,

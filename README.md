@@ -15,12 +15,40 @@ All data is fetched live from the
 ## Pages
 
 - **Browse** (`/browse`, also `/`) - Filter by time range
-  (24h/7d/30d/1y/custom) and type (Story, Ask HN, Show HN, Poll, Job),
-  sorted by points. URL state is shareable.
-- **Monthly Highlights** (`/monthly`) - Top 20 stories from each of the
-  last 12 calendar months. Cached in-memory for 1 hour.
+  (Hot/24h/7d/30d/1y/custom) and type (Story, Ask HN, Show HN, Poll,
+  Job), sorted by points. URL state is shareable.
+- **Highlights** (`/highlights`) - Top stories from each recent day,
+  week, or month, with infinite scroll.
+- **Thread** (`/item?id=N`) - Amber's own view of a discussion. See
+  below.
 - **API Docs** (`/api-docs`) - Human-readable documentation for the
   REST API.
+
+## Reading threads
+
+`/item?id=N` renders a whole HN discussion in one page, built around
+making the nesting level obvious and easy to escape.
+
+Every ancestor of a comment gets a colored vertical rail to its left.
+Clicking any rail collapses that ancestor and scrolls to it, so you can
+close off a subthread from wherever you happen to be reading rather
+than scrolling back up to find its parent. A breadcrumb pinned under
+the header shows the ancestor chain of whatever is currently on screen.
+
+Each comment offers previous/next reply *at the same level*, parent,
+and top-of-thread. With a mouse there is also a keyboard scheme -
+press `?` for the list.
+
+On touch devices only, a story title opens Amber's own article view
+alongside the comments, so the two are one tap apart instead of two
+browser tabs apart. With a mouse the title opens the real page in a new
+tab, which beats any iframe. That split is keyed to `pointer: coarse`,
+not screen width, so rotating a phone doesn't change where links go.
+
+Roughly 40% of the sites HN links to refuse to be embedded, and a
+browser gives no way to detect that, so known refusers are listed in
+`lib/frame-policy.ts` and everything else falls back to a prominent
+"open the original" link.
 
 ## REST API
 
@@ -50,11 +78,16 @@ JSON discovery endpoint with links to docs and all API routes.
 ## Running Locally
 
 ```bash
-npm install
-npm run dev
+./dev -i    # install
+./dev -d    # dev server
+./dev -a    # lint + typecheck + test + build
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+Tests cover `lib/` only, and deliberately: the thread model, comment
+HTML handling, and frame policy are pure functions, so they run under
+vitest in a node environment with no DOM and no React test setup.
 
 ## Project Management
 

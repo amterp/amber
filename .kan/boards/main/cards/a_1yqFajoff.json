@@ -1,0 +1,17 @@
+{
+  "_v": 3,
+  "alias": "thread-view-sibling",
+  "alias_explicit": false,
+  "column": "done",
+  "created_at_millis": 1785377259851,
+  "creator": "Alexander Terp",
+  "id": "a_1yqFajoff",
+  "position": "u8UUUUUU",
+  "title": "thread view: sibling nav + keyboard shortcuts",
+  "type": "feature",
+  "updated_at_millis": 1785379393423,
+  "history": [
+    {"field":"column","value":"backlog-hi","at":1785377259851},
+    {"field":"column","value":"done","at":1785379393423}
+  ]
+}

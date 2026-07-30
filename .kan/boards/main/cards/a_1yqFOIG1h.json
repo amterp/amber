@@ -1,0 +1,17 @@
+{
+  "_v": 3,
+  "alias": "thread-view-indent",
+  "alias_explicit": false,
+  "column": "done",
+  "created_at_millis": 1785377252147,
+  "creator": "Alexander Terp",
+  "id": "a_1yqFOIG1h",
+  "position": "u8UUUU",
+  "title": "thread view: indent rails + collapse",
+  "type": "feature",
+  "updated_at_millis": 1785378653299,
+  "history": [
+    {"field":"column","value":"next","at":1785377252147},
+    {"field":"column","value":"done","at":1785378653299}
+  ]
+}

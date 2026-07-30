@@ -1,0 +1,17 @@
+{
+  "_v": 3,
+  "alias": "link-story-titles",
+  "alias_explicit": false,
+  "column": "done",
+  "created_at_millis": 1785377260152,
+  "creator": "Alexander Terp",
+  "id": "a_1yqFbDW18",
+  "position": "u8UUUUUUUU",
+  "title": "link story titles into the app",
+  "type": "enhancement",
+  "updated_at_millis": 1785379393655,
+  "history": [
+    {"field":"column","value":"backlog-hi","at":1785377260152},
+    {"field":"column","value":"done","at":1785379393655}
+  ]
+}

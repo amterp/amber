@@ -1,0 +1,17 @@
+{
+  "_v": 3,
+  "alias": "thread-view-sticky",
+  "alias_explicit": false,
+  "column": "done",
+  "created_at_millis": 1785377259689,
+  "creator": "Alexander Terp",
+  "id": "a_1yqFaS0s0",
+  "position": "u8UUUUU",
+  "title": "thread view: sticky ancestor bar",
+  "type": "feature",
+  "updated_at_millis": 1785379393339,
+  "history": [
+    {"field":"column","value":"backlog-hi","at":1785377259689},
+    {"field":"column","value":"done","at":1785379393339}
+  ]
+}
