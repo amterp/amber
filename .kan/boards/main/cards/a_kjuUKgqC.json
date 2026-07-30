@@ -1,11 +1,16 @@
 {
-  "_v": 1,
+  "_v": 3,
   "alias": "serve-statically-in",
   "alias_explicit": false,
+  "column": "done",
   "created_at_millis": 1774132133600,
   "creator": "Alexander Terp",
   "id": "a_kjuUKgqC",
+  "position": "XH",
   "title": "serve statically in gh pages",
   "type": "feature",
-  "updated_at_millis": 1774132211445
+  "updated_at_millis": 1774132211445,
+  "history": [
+    {"field":"column","value":"done","at":1774132133600}
+  ]
 }

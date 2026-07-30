@@ -1,11 +1,16 @@
 {
-  "_v": 1,
+  "_v": 3,
   "alias": "rad-dev-workflow",
   "alias_explicit": false,
+  "column": "done",
   "created_at_millis": 1774132861504,
   "creator": "Alexander Terp",
   "id": "a_kkDQM1UX",
+  "position": "d!",
   "title": "rad dev workflow",
   "type": "enhancement",
-  "updated_at_millis": 1774132861576
+  "updated_at_millis": 1774132861576,
+  "history": [
+    {"field":"column","value":"done","at":1774132861504}
+  ]
 }

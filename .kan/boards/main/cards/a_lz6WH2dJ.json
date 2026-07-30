@@ -1,11 +1,16 @@
 {
-  "_v": 1,
+  "_v": 3,
   "alias": "default-browse-to",
   "alias_explicit": false,
+  "column": "done",
   "created_at_millis": 1774316108652,
   "creator": "Alexander Terp",
   "id": "a_lz6WH2dJ",
+  "position": "4i",
   "title": "default browse to 24h",
   "type": "bug",
-  "updated_at_millis": 1774316108710
+  "updated_at_millis": 1774316108710,
+  "history": [
+    {"field":"column","value":"done","at":1774316108652}
+  ]
 }

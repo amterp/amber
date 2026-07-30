@@ -1,11 +1,16 @@
 {
-  "_v": 1,
+  "_v": 3,
   "alias": "attribute-algolia",
   "alias_explicit": false,
+  "column": "done",
   "created_at_millis": 1774215565967,
   "creator": "Alexander Terp",
   "id": "a_lIuwe1fV",
+  "position": "Lr",
   "title": "attribute algolia",
   "type": "enhancement",
-  "updated_at_millis": 1774215566049
+  "updated_at_millis": 1774215566049,
+  "history": [
+    {"field":"column","value":"done","at":1774215565967}
+  ]
 }

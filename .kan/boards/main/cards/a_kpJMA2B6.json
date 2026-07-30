@@ -1,11 +1,16 @@
 {
-  "_v": 1,
+  "_v": 3,
   "alias": "bookmarking",
   "alias_explicit": false,
+  "column": "next",
   "created_at_millis": 1774145005952,
   "creator": "Alexander Terp",
   "id": "a_kpJMA2B6",
+  "position": "U",
   "title": "bookmarking ?",
   "type": "feature",
-  "updated_at_millis": 1774145006090
+  "updated_at_millis": 1774145006090,
+  "history": [
+    {"field":"column","value":"next","at":1774145005952}
+  ]
 }

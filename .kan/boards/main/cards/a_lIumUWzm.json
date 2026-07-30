@@ -1,11 +1,16 @@
 {
-  "_v": 1,
+  "_v": 3,
   "alias": "link-github",
   "alias_explicit": false,
+  "column": "done",
   "created_at_millis": 1774215559669,
   "creator": "Alexander Terp",
   "id": "a_lIumUWzm",
+  "position": "G8",
   "title": "link github",
   "type": "enhancement",
-  "updated_at_millis": 1774215559813
+  "updated_at_millis": 1774215559813,
+  "history": [
+    {"field":"column","value":"done","at":1774215559669}
+  ]
 }

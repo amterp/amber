@@ -1,11 +1,16 @@
 {
-  "_v": 1,
+  "_v": 3,
   "alias": "cache-older-articles",
   "alias_explicit": false,
+  "column": "done",
   "created_at_millis": 1774132292617,
   "creator": "Alexander Terp",
   "id": "a_kjycnUrT",
+  "position": "RZ",
   "title": "cache older articles? run gh action ?",
   "type": "feature",
-  "updated_at_millis": 1774132292683
+  "updated_at_millis": 1774132292683,
+  "history": [
+    {"field":"column","value":"done","at":1774132292617}
+  ]
 }

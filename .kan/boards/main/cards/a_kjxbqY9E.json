@@ -1,11 +1,16 @@
 {
-  "_v": 1,
+  "_v": 3,
   "alias": "remove-api-from",
   "alias_explicit": false,
+  "column": "done",
   "created_at_millis": 1774132253585,
   "creator": "Alexander Terp",
   "id": "a_kjxbqY9E",
+  "position": "ii",
   "title": "remove API from public version (SECURITY)",
   "type": "feature",
-  "updated_at_millis": 1774132253661
+  "updated_at_millis": 1774132253661,
+  "history": [
+    {"field":"column","value":"done","at":1774132253585}
+  ]
 }
