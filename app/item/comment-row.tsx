@@ -10,8 +10,10 @@ interface Props {
   collapsed: boolean;
   current: boolean;
   onToggle: (id: number) => void;
-  /** Collapse an ancestor by its index in the flat list, and scroll to it. */
-  onCollapseAncestor: (index: number) => void;
+  /** Jump to the next sibling of the ancestor at this index - skips past that whole branch. */
+  onSkipAncestor: (index: number) => void;
+  /** Whether the ancestor at this index has anywhere to skip to (its nextSiblingIndex, or -1). */
+  nextSiblingAt: (index: number) => number;
   onNavigate: (index: number) => void;
   authorAt: (index: number) => string;
   tracker: RowTracker | null;
@@ -22,16 +24,19 @@ interface Props {
  * left rather than from nested DOM, so collapsing a subtree is a filter over an
  * array instead of a tree reconciliation.
  *
- * Each rail is also the click target for collapsing that ancestor, which is what
- * makes "collapse the level I'm looking at" work at any scroll position without
- * scrolling back up to hunt for the parent.
+ * Each rail is also a jump target: clicking it skips past that ancestor's whole
+ * branch, landing on whatever comes next at that nesting level. That's how you
+ * skip a subthread you're not interested in without losing your scroll position
+ * or hunting for a "next" control. Collapsing a single comment is the chevron's
+ * job; collapsing a whole ancestor branch is the 'z' keyboard shortcut's.
  */
 function CommentRow({
   comment,
   collapsed,
   current,
   onToggle,
-  onCollapseAncestor,
+  onSkipAncestor,
+  nextSiblingAt,
   onNavigate,
   authorAt,
   tracker,
@@ -58,27 +63,50 @@ function CommentRow({
         collapsed ? "opacity-70" : ""
       }`}
     >
-      {ancestorIndices.map((ancestorIndex, level) => (
-        <button
-          key={ancestorIndex}
-          type="button"
-          onClick={() => onCollapseAncestor(ancestorIndex)}
-          title={`Collapse ${authorAt(ancestorIndex)}'s thread`}
-          aria-label={`Collapse the thread started by ${authorAt(ancestorIndex)}`}
-          className={`group/rail relative shrink-0 cursor-pointer touch-manipulation before:absolute before:inset-y-0 before:-inset-x-1 before:content-[''] ${railWidthClass(
-            level
-          )}`}
-        >
-          {/* 3px, not a hairline: rails carry the nesting level, which is the
-              whole point of this view. A 1px line lands on a half-pixel boundary
-              and anti-aliases itself into invisibility. */}
-          <span
-            className={`absolute inset-y-0 left-0 w-[3px] rounded-full transition-all group-hover/rail:-left-px group-hover/rail:w-[5px] ${railTint(
+      {ancestorIndices.map((ancestorIndex, level) => {
+        // A rail with nowhere to skip to (the ancestor it belongs to is the
+        // last child at its level) renders as a plain, non-interactive bar:
+        // still carries the depth color, but drops out of tab order and the
+        // hover affordance rather than inviting a click that would do nothing.
+        if (nextSiblingAt(ancestorIndex) < 0) {
+          return (
+            <span
+              key={ancestorIndex}
+              aria-hidden
+              title={`No more replies after ${authorAt(ancestorIndex)}'s thread`}
+              className={`relative shrink-0 ${railWidthClass(level)}`}
+            >
+              <span
+                className={`absolute inset-y-0 left-0 w-[3px] rounded-full opacity-40 ${railTint(
+                  level
+                )}`}
+              />
+            </span>
+          );
+        }
+
+        return (
+          <button
+            key={ancestorIndex}
+            type="button"
+            onClick={() => onSkipAncestor(ancestorIndex)}
+            title={`Skip past ${authorAt(ancestorIndex)}'s thread`}
+            aria-label={`Skip to the next reply after ${authorAt(ancestorIndex)}'s thread`}
+            className={`group/rail relative shrink-0 cursor-pointer touch-manipulation before:absolute before:inset-y-0 before:-inset-x-1 before:content-[''] ${railWidthClass(
               level
             )}`}
-          />
-        </button>
-      ))}
+          >
+            {/* 3px, not a hairline: rails carry the nesting level, which is the
+                whole point of this view. A 1px line lands on a half-pixel boundary
+                and anti-aliases itself into invisibility. */}
+            <span
+              className={`absolute inset-y-0 left-0 w-[3px] rounded-full transition-all group-hover/rail:-left-px group-hover/rail:w-[5px] ${railTint(
+                level
+              )}`}
+            />
+          </button>
+        );
+      })}
 
       {/* min-w-0 keeps a wide <pre> or a bare URL inside its own scroll box
           instead of stretching the page. */}

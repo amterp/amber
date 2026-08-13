@@ -141,6 +141,10 @@ export default function CommentThread({ thread, articleUrl }: Props) {
     [beginCollapse]
   );
 
+  // Bulk-collapses a whole ancestor branch. Reached only via the 'z'
+  // keyboard shortcut now - rails and ancestor-bar chips navigate instead,
+  // since a click landing near a row used to collapse whatever ancestor
+  // happened to own that column, not the row it looked like you clicked.
   const collapseAncestor = useCallback(
     (index: number) => {
       const target = thread.comments[index];
@@ -155,9 +159,21 @@ export default function CommentThread({ thread, articleUrl }: Props) {
     [thread, beginCollapse]
   );
 
+  /** Jump past an ancestor's whole branch to whatever comes next at its level. */
+  const skipAncestor = useCallback(
+    (index: number) => goTo(nextSibling(thread, index)),
+    [thread, goTo]
+  );
+
   // Stable across renders, so it never defeats CommentRow's memo.
   const authorAt = useCallback(
     (index: number) => thread.comments[index]?.author ?? "[deleted]",
+    [thread]
+  );
+
+  /** Lets a rail know, without touching thread.comments directly, whether it has anywhere to skip to. */
+  const nextSiblingAt = useCallback(
+    (index: number) => thread.comments[index]?.nextSiblingIndex ?? -1,
     [thread]
   );
 
@@ -295,7 +311,7 @@ export default function CommentThread({ thread, articleUrl }: Props) {
         currentIndex={current}
         expandedChain={expandedChain}
         onExpandChain={() => setExpandedChain(true)}
-        onPick={collapseAncestor}
+        onPick={goTo}
       />
 
       <div>
@@ -308,7 +324,8 @@ export default function CommentThread({ thread, articleUrl }: Props) {
               collapsed={collapsed.has(comment.id)}
               current={index === focused}
               onToggle={toggle}
-              onCollapseAncestor={collapseAncestor}
+              onSkipAncestor={skipAncestor}
+              nextSiblingAt={nextSiblingAt}
               onNavigate={goTo}
               authorAt={authorAt}
               tracker={tracker}

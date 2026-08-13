@@ -1,7 +1,7 @@
 /**
  * Rails are the vertical lines to the left of a comment, one per ancestor. They
  * carry the indentation, show the nesting depth, and act as the click target for
- * collapsing that ancestor.
+ * skipping past that ancestor's branch to whatever comes next at that level.
  */
 
 /** Rails thin out with depth so a depth-21 comment still has room for text. */
