@@ -77,7 +77,7 @@ function CommentRow({
               className={`relative shrink-0 ${railWidthClass(level)}`}
             >
               <span
-                className={`absolute inset-y-0 left-0 w-[3px] rounded-full opacity-40 ${railTint(
+                className={`absolute inset-y-0 left-0 w-[3px] opacity-40 ${railTint(
                   level
                 )}`}
               />
@@ -92,15 +92,20 @@ function CommentRow({
             onClick={() => onSkipAncestor(ancestorIndex)}
             title={`Skip past ${authorAt(ancestorIndex)}'s thread`}
             aria-label={`Skip to the next reply after ${authorAt(ancestorIndex)}'s thread`}
-            className={`group/rail relative shrink-0 cursor-pointer touch-manipulation before:absolute before:inset-y-0 before:-inset-x-1 before:content-[''] ${railWidthClass(
+            className={`relative shrink-0 cursor-pointer touch-manipulation before:absolute before:inset-y-0 before:-inset-x-1 before:content-[''] ${railWidthClass(
               level
             )}`}
           >
             {/* 3px, not a hairline: rails carry the nesting level, which is the
-                whole point of this view. A 1px line lands on a half-pixel boundary
-                and anti-aliases itself into invisibility. */}
+                whole point of this view. Square ends, not rounded: every row
+                in a run sharing this ancestor draws its own segment, and a
+                rounded cap on each one is what made the line read as
+                per-comment rather than per-ancestor - flush edges keep same-
+                color runs looking like one continuous bar. No hover growth
+                either, for the same reason: enlarging just this row's
+                segment was the other cue that suggested false ownership. */}
             <span
-              className={`absolute inset-y-0 left-0 w-[3px] rounded-full transition-all group-hover/rail:-left-px group-hover/rail:w-[5px] ${railTint(
+              className={`absolute inset-y-0 left-0 w-[3px] ${railTint(
                 level
               )}`}
             />
