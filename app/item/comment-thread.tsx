@@ -77,7 +77,9 @@ export default function CommentThread({ thread, articleUrl }: Props) {
   // One notion of "the comment I'm on": what you last navigated to, otherwise
   // whatever is under the headers. On touch there is no focus gesture to spare
   // (tapping a header collapses it), and "next reply at this level" should mean
-  // next reply to what you're looking at anyway.
+  // next reply to what you're looking at anyway. The pin releases on the next
+  // wheel/touch scroll (see the effect above), so this only wins for as long
+  // as the reader hasn't scrolled since navigating.
   const current = focused >= 0 && positionOf(visible, focused) >= 0 ? focused : tracked;
 
   // Built once via a lazy initializer, not in an effect: rows' effects run
@@ -89,6 +91,26 @@ export default function CommentThread({ thread, articleUrl }: Props) {
   );
 
   useEffect(() => () => tracker?.disconnect(), [tracker]);
+
+  // A wheel tick or touch drag means the reader has moved on from wherever
+  // they last navigated to - release the pin so `current` tracks the header
+  // line again instead of staying stuck on a spot they've since scrolled
+  // away from (including a top-level comment's empty ancestor chain, which
+  // otherwise keeps the ancestor bar hidden long after scrolling into its
+  // replies). Deliberately not a plain `scroll` listener: our own animated
+  // navigation calls `window.scrollTo` every frame, which fires `scroll`
+  // events indistinguishable from the reader's own - wheel/touch are real
+  // input, so they're what everything else in this file already keys off of
+  // to tell "the reader took over" apart from "we're still animating".
+  useEffect(() => {
+    const releaseFocus = () => setFocused(-1);
+    window.addEventListener("wheel", releaseFocus, { passive: true });
+    window.addEventListener("touchmove", releaseFocus, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", releaseFocus);
+      window.removeEventListener("touchmove", releaseFocus);
+    };
+  }, []);
 
   const goTo = useCallback(
     (index: number) => {
