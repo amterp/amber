@@ -1,21 +1,17 @@
+import { trapezoidProgress } from "@/lib/scroll-profile";
+
 /**
  * Movement cues for the thread view. Collapsing a subtree or jumping to a
  * sibling rearranges the page underneath you; animating the change is what
  * makes it followable rather than a teleport.
  *
- * Everything here is capped well under 250ms and skipped entirely when the
- * reader has asked for reduced motion.
+ * Skipped entirely when the reader has asked for reduced motion.
  */
 
-export const SCROLL_MS = 220;
 export const SHIFT_MS = 200;
 
 /** Decelerating curve: fast off the mark, gentle on arrival. */
 const EASE = "cubic-bezier(0.22, 0.61, 0.36, 1)";
-
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3);
-}
 
 export function prefersReducedMotion(): boolean {
   if (typeof window === "undefined" || !window.matchMedia) return false;
@@ -23,10 +19,29 @@ export function prefersReducedMotion(): boolean {
 }
 
 /**
- * Animating across thousands of rows in a fifth of a second is a strobe, not a
- * cue. Past this distance we cut instead.
+ * scrollToComment's speed while cruising, and how long it takes to spin up
+ * to (or down from) that speed. A rail or ancestor chip can now skip a
+ * branch of any size, so a fixed animation duration no longer makes sense -
+ * past a few viewports it either compresses into an unreadable strobe or,
+ * with the old distance cutoff, teleports outright. Scaling the *time*
+ * instead of squeezing distance into a fixed time (see trapezoidProgress in
+ * lib/scroll-profile.ts) keeps speed bounded and legible no matter how far
+ * the jump is - a cross-thread skip just takes proportionally longer, which
+ * given how rarely anyone will drag that far (Deutsche Bank-thread-sized
+ * threads are the exception, not the rule) is a better trade than either of
+ * the alternatives above.
  */
-const INSTANT_DISTANCE_VIEWPORTS = 3;
+const CRUISE_PX_PER_MS = 10;
+/**
+ * Time to spin up to (or down from) cruising speed. Doubling cruise speed
+ * alone doesn't uniformly double how fast a trip *feels* - the ramp is
+ * accelerating at the same rate either way, so its own duration wouldn't
+ * budge and short jumps barely speed up at all. Halving it alongside the
+ * cruise speed keeps accel scaling right along with velocity, so every trip
+ * - ramp-only short hops included - takes exactly half as long, not just
+ * the cruise-dominated long ones.
+ */
+const RAMP_MS = 75;
 
 let activeFrame: number | null = null;
 let settleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -68,11 +83,7 @@ export function scrollToComment(id: number): void {
     }, 100);
   };
 
-  const tooFar =
-    Math.abs(destination - startY) >
-    window.innerHeight * INSTANT_DISTANCE_VIEWPORTS;
-
-  if (prefersReducedMotion() || tooFar) {
+  if (prefersReducedMotion()) {
     window.scrollTo(0, destination);
     settle();
     return;
@@ -83,15 +94,20 @@ export function scrollToComment(id: number): void {
   window.addEventListener("wheel", abort, { passive: true, once: true });
   window.addEventListener("touchstart", abort, { passive: true, once: true });
 
+  const { totalMs, at } = trapezoidProgress(
+    Math.abs(destination - startY),
+    CRUISE_PX_PER_MS,
+    RAMP_MS
+  );
   const started = performance.now();
   const step = (now: number) => {
     const to = targetY();
     if (to === null) return cancelActiveScroll();
 
-    const progress = Math.min(1, (now - started) / SCROLL_MS);
-    window.scrollTo(0, startY + (to - startY) * easeOutCubic(progress));
+    const elapsed = now - started;
+    window.scrollTo(0, startY + (to - startY) * at(elapsed));
 
-    if (progress < 1) {
+    if (elapsed < totalMs) {
       activeFrame = requestAnimationFrame(step);
     } else {
       activeFrame = null;
