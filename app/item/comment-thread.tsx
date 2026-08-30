@@ -34,6 +34,7 @@ import {
   ScrollAnchor,
 } from "./motion";
 import { createRowTracker, RowTracker } from "./row-tracker";
+import { useAmberLinkClick } from "./use-amber-links";
 
 interface Props {
   thread: Thread;
@@ -187,6 +188,22 @@ export default function CommentThread({ thread, articleUrl }: Props) {
     [thread, goTo]
   );
 
+  /**
+   * A badge pointing at a comment this thread already holds should not cost a
+   * page load. Anything else is declined, and navigates.
+   */
+  const jumpToComment = useCallback(
+    (id: number) => {
+      const index = thread.indexById.get(id);
+      if (index === undefined) return false;
+      goTo(index);
+      return true;
+    },
+    [thread, goTo]
+  );
+
+  const onAmberLink = useAmberLinkClick(jumpToComment);
+
   // Stable across renders, so it never defeats CommentRow's memo.
   const authorAt = useCallback(
     (index: number) => thread.comments[index]?.author ?? "[deleted]",
@@ -336,7 +353,7 @@ export default function CommentThread({ thread, articleUrl }: Props) {
         onPick={goTo}
       />
 
-      <div>
+      <div onClick={onAmberLink}>
         {visible.map((index) => {
           const comment = thread.comments[index];
           return (

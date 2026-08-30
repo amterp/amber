@@ -8,10 +8,12 @@ import { loadThread } from "@/lib/hn-item";
 import { headerFromSubmission, recallSubmission } from "@/lib/seen-store";
 import { useCoarsePointer } from "@/lib/use-coarse-pointer";
 import { Thread } from "@/lib/types";
+import { itemHref } from "@/lib/url";
 import ArticlePane from "./article-pane";
 import CommentThread from "./comment-thread";
 import StoryHeaderBar, { ItemViewMode } from "./story-header";
 import ThreadSkeleton from "./thread-skeleton";
+import { useAmberLinkClick } from "./use-amber-links";
 
 type Status = "loading" | "ready" | "missing" | "error";
 
@@ -64,7 +66,7 @@ export default function ItemView() {
       .then((result) => {
         if (cancelled) return;
         if (result.kind === "comment") {
-          router.replace(`/item?id=${result.storyId}#c${result.commentId}`);
+          router.replace(itemHref(result.storyId, result.commentId));
           return;
         }
         setLoaded({ key: requestKey, status: "ready", thread: result.thread });
@@ -124,6 +126,11 @@ export default function ItemView() {
     [thread]
   );
 
+  // Self-text sits outside CommentThread, so it needs its own handler. No jump
+  // callback: an Ask HN body linking into its own discussion isn't worth
+  // plumbing the thread up here for.
+  const onAmberLink = useAmberLinkClick();
+
   if (!id) return null;
 
   return (
@@ -147,6 +154,7 @@ export default function ItemView() {
         <div className="mx-auto max-w-5xl px-4 py-4">
           {selfText && (
             <div
+              onClick={onAmberLink}
               className="hn-text mb-4 border-b border-gray-100 pb-4 text-gray-800 dark:border-gray-800 dark:text-gray-200"
               dangerouslySetInnerHTML={{ __html: selfText }}
             />

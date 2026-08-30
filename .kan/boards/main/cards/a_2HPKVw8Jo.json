@@ -1,0 +1,18 @@
+{
+  "_v": 3,
+  "alias": "open-linked-hn-items",
+  "alias_explicit": false,
+  "column": "done",
+  "created_at_millis": 1788120604363,
+  "creator": "Alexander Terp",
+  "description": "Comments often link other HN items. Leave the writer's link as\nwritten and inject a small \"Amber\" pill after it: the raw link still\nopens news.ycombinator.com in a new tab, the pill opens the thread in\nAmber in the same tab. When the target is a comment in the thread you\nare already reading, the pill jumps there in place instead of loading\nanything.",
+  "id": "a_2HPKVw8Jo",
+  "position": "1",
+  "title": "open linked HN items in Amber",
+  "type": "feature",
+  "updated_at_millis": 1788124993953,
+  "history": [
+    {"field":"column","value":"in-progress","at":1788120604363},
+    {"field":"column","value":"done","at":1788124993953}
+  ]
+}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Submission } from "@/lib/types";
 import { formatTimeAgo } from "@/lib/time";
+import { itemHref } from "@/lib/url";
 
 interface Props {
   submission: Submission;
@@ -14,7 +15,7 @@ export default function SubmissionCard({ submission, rank }: Props) {
   const { id, title, url, domain, author, points, commentCount, createdAtTimestamp } =
     submission;
 
-  const threadHref = `/item?id=${id}`;
+  const threadHref = itemHref(id);
 
   return (
     <div className="flex gap-3 py-3 border-b border-gray-100 last:border-b-0 dark:border-gray-800">

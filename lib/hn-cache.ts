@@ -1,6 +1,5 @@
 import { Period, Submission } from "./types";
-
-export const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+import { basePath } from "./url";
 
 const MS_PER_DAY = 86400 * 1000;
 
