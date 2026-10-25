@@ -8,30 +8,35 @@ default_column = "backlog-lo"
   color = "#6b7280"
   description = "Low priority planned work"
   limit = 0
+  category = "open"
 
 [[columns]]
   name = "backlog-hi"
   color = "#3b82f6"
   description = "High priority planned work"
   limit = 10
+  category = "open"
 
 [[columns]]
   name = "next"
   color = "#f59e0b"
   description = "Ready to be picked up next"
   limit = 5
+  category = "open"
 
 [[columns]]
   name = "in-progress"
   color = "#10b981"
   description = "Currently being worked on"
   limit = 3
+  category = "active"
 
 [[columns]]
   name = "done"
   color = "#9333ea"
   description = "Completed work"
   limit = 0
+  category = "done"
 
 [custom_fields]
   [custom_fields.type]

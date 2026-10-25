@@ -6,10 +6,13 @@
   "created_at_millis": 1785377260483,
   "creator": "Alexander Terp",
   "id": "a_1yqFbkUxC",
-  "position": "U",
+  "position": "a0",
+  "related": [
+    "a_1yqFNpWtk"
+  ],
   "title": "thread view: HN comment ordering via firebase",
   "type": "enhancement",
-  "updated_at_millis": 1785377260584,
+  "updated_at_millis": 1792891477314,
   "history": [
     {"field":"column","value":"backlog-lo","at":1785377260483}
   ]
