@@ -87,94 +87,100 @@ export default function AncestorBar({
   const shown = elided ? chain.slice(chain.length - visibleCount) : chain;
   const firstShownLevel = chain.length - shown.length;
 
+  // The zero-height sticky wrapper keeps the bar out of the document flow, so
+  // it appearing or vanishing (as the reader scrolls between top-level comments
+  // and replies) never shifts the comments below. It overlays them instead,
+  // inside the space --hn-scroll-offset already reserves under the headers.
   return (
-    <div
-      ref={barRef}
-      className="sticky top-[100px] z-30 -mx-4 flex items-center gap-1 overflow-x-auto border-b border-gray-200 bg-white/95 px-4 py-1.5 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/95"
-    >
-      <span className="sr-only">Replying within:</span>
-
-      {/* Off-screen twin of the full, unelided chain plus a worst-case pill
-          and a chevron, purely so recomputeFit can read real rendered widths.
-          visibility:hidden (not display:none, which reports zero width) keeps
-          it out of both the visual layout and hit-testing. */}
+    <div className="sticky top-[100px] z-30 h-0">
       <div
-        aria-hidden
-        className="pointer-events-none invisible absolute left-0 top-0 flex items-center gap-1"
+        ref={barRef}
+        className="relative -mx-4 flex items-center gap-1 overflow-x-auto border-b border-gray-200 bg-white/95 px-4 py-1.5 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/95"
       >
-        {chain.map((ancestorIndex, i) => (
-          <span
-            key={ancestorIndex}
-            ref={(el) => {
-              chipRefs.current[i] = el;
-            }}
-            className="flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-          >
-            <span className="h-2 w-2 shrink-0 rounded-full" />
-            {thread.comments[ancestorIndex]?.author ?? "[deleted]"}
-          </span>
-        ))}
-        <span
-          ref={(el) => {
-            pillRef.current = el;
-          }}
-          className="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
-        >
-          {/* Widest realistic pill for this chain: can never elide more than
-              chain.length - 1 chips, since at least one chip always shows. */}
-          +{Math.max(chain.length - 1, 1)}
-        </span>
-        <span
-          ref={(el) => {
-            chevronRef.current = el;
-          }}
-          className="shrink-0"
-        >
-          &rsaquo;
-        </span>
-      </div>
+        <span className="sr-only">Replying within:</span>
 
-      {elided && (
-        <>
-          <button
-            type="button"
-            onClick={onExpandChain}
-            title={`Show all ${chain.length} levels`}
-            className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+        {/* Off-screen twin of the full, unelided chain plus a worst-case pill
+            and a chevron, purely so recomputeFit can read real rendered widths.
+            visibility:hidden (not display:none, which reports zero width) keeps
+            it out of both the visual layout and hit-testing. */}
+        <div
+          aria-hidden
+          className="pointer-events-none invisible absolute left-0 top-0 flex items-center gap-1"
+        >
+          {chain.map((ancestorIndex, i) => (
+            <span
+              key={ancestorIndex}
+              ref={(el) => {
+                chipRefs.current[i] = el;
+              }}
+              className="flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
+            >
+              <span className="h-2 w-2 shrink-0 rounded-full" />
+              {thread.comments[ancestorIndex]?.author ?? "[deleted]"}
+            </span>
+          ))}
+          <span
+            ref={(el) => {
+              pillRef.current = el;
+            }}
+            className="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium"
           >
-            +{chain.length - shown.length}
-          </button>
-          <span aria-hidden className="shrink-0 text-gray-300 dark:text-gray-600">
+            {/* Widest realistic pill for this chain: can never elide more than
+                chain.length - 1 chips, since at least one chip always shows. */}
+            +{Math.max(chain.length - 1, 1)}
+          </span>
+          <span
+            ref={(el) => {
+              chevronRef.current = el;
+            }}
+            className="shrink-0"
+          >
             &rsaquo;
           </span>
-        </>
-      )}
+        </div>
 
-      {shown.map((ancestorIndex, i) => {
-        const level = firstShownLevel + i;
-        const author = thread.comments[ancestorIndex]?.author ?? "[deleted]";
-        return (
-          <Fragment key={ancestorIndex}>
-            {i > 0 && (
-              <span aria-hidden className="shrink-0 text-gray-300 dark:text-gray-600">
-                &rsaquo;
-              </span>
-            )}
+        {elided && (
+          <>
             <button
               type="button"
-              onClick={() => onPick(ancestorIndex)}
-              title={`Jump to ${author}'s comment`}
-              className="flex shrink-0 items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              onClick={onExpandChain}
+              title={`Show all ${chain.length} levels`}
+              className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
             >
-              <span
-                aria-hidden
-                className={`h-2 w-2 shrink-0 rounded-full ${railTint(level)}`}
-              />
-              {author}
+              +{chain.length - shown.length}
             </button>
-          </Fragment>
-        );
-      })}
+            <span aria-hidden className="shrink-0 text-gray-300 dark:text-gray-600">
+              &rsaquo;
+            </span>
+          </>
+        )}
+
+        {shown.map((ancestorIndex, i) => {
+          const level = firstShownLevel + i;
+          const author = thread.comments[ancestorIndex]?.author ?? "[deleted]";
+          return (
+            <Fragment key={ancestorIndex}>
+              {i > 0 && (
+                <span aria-hidden className="shrink-0 text-gray-300 dark:text-gray-600">
+                  &rsaquo;
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => onPick(ancestorIndex)}
+                title={`Jump to ${author}'s comment`}
+                className="flex shrink-0 items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <span
+                  aria-hidden
+                  className={`h-2 w-2 shrink-0 rounded-full ${railTint(level)}`}
+                />
+                {author}
+              </button>
+            </Fragment>
+          );
+        })}
+      </div>
     </div>
   );
 }
