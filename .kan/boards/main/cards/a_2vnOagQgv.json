@@ -1,0 +1,21 @@
+{
+  "_v": 4,
+  "alias": "article-view-no",
+  "alias_explicit": false,
+  "column": "next",
+  "created_at_millis": 1794088494185,
+  "creator": "Alexander Terp",
+  "description": "On touch devices, when a framed article renders as a blank white page, the article view offers no way to open the original.\n\nThe only \"Open original\" link in the embed case sits in a hint that `ArticlePane` shows when the iframe's `load` event has not fired within 4 seconds (`app/item/article-pane.tsx:34-38`). Browsers fire `load` even when a site refuses framing, so the hint almost never appears on exactly the pages that need it. The component's own doc comment promises to \"always offer the original\", and the embed path does not. Sites missing from the frame blocklist (see \"iframe embed blocklist needs periodic review\") all land here.\n\nToday the only escape is the domain link next to the story title. Alex: \"There needs to be some way to go from the amber view of a post to just opening the original page in a new tab.\"\n\nWant: an \"Open original\" control that is always visible in the article view, not gated on load timing. The timed hint can then go, since it cannot tell a blocked frame from a loaded one.\n\nFrom chat notes NNnMRMVuvq1 (2026-09-05, \"make it easier to open original link\") and R1ItZXYLRGS (2026-10-14, voice note).",
+  "id": "a_2vnOagQgv",
+  "position": "Zy",
+  "related": [
+    "a_1yqFaxUH4",
+    "a_1yqFbzWSd"
+  ],
+  "title": "article view: no reliable way to open the original",
+  "type": "bug",
+  "updated_at_millis": 1794088503684,
+  "history": [
+    {"field":"column","value":"next","at":1794088494185}
+  ]
+}

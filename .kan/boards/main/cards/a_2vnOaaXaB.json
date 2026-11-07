@@ -1,0 +1,20 @@
+{
+  "_v": 4,
+  "alias": "thread-view-sticky-ancestor",
+  "alias_explicit": false,
+  "column": "next",
+  "created_at_millis": 1794088494127,
+  "creator": "Alexander Terp",
+  "description": "Comments jump while scrolling a thread whenever the sticky ancestor bar appears or disappears.\n\n`AncestorBar` returns `null` when the chain is empty (`app/item/ancestor-bar.tsx:84`). Scrolling between a top-level comment and a reply toggles the bar, and its height (about 36px) is added to or removed from the flow above the comments, so everything below shifts.\n\nFix direction: keep the bar's space reserved while it is empty, or position it so it overlays the comments instead of pushing them.\n\nFrom chat note MfsTjhRGpzY (2026-08-29): \"comments jump when scrolling when the poster train top element disappears or appears\".",
+  "id": "a_2vnOaaXaB",
+  "position": "Zz",
+  "related": [
+    "a_1yqFaS0s0"
+  ],
+  "title": "thread view: sticky ancestor bar makes comments jump",
+  "type": "bug",
+  "updated_at_millis": 1794088503717,
+  "history": [
+    {"field":"column","value":"next","at":1794088494127}
+  ]
+}
