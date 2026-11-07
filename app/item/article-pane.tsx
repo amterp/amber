@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { framePolicy } from "@/lib/frame-policy";
 
 interface Props {
@@ -10,32 +9,16 @@ interface Props {
   onShowComments: () => void;
 }
 
-/** How long to wait before admitting the page probably isn't coming. */
-const HINT_DELAY_MS = 4000;
-
 /**
  * Shows the linked article inline, on touch devices only.
  *
  * Roughly 40% of HN links refuse to be framed and we cannot detect that from
- * JavaScript - the browser fires `load` either way. So failure is handled in
- * three layers: skip the attempt for hosts we know refuse, always offer the
- * original, and surface a hint if nothing has loaded after a few seconds.
+ * JavaScript - the browser fires `load` either way, so a refused frame is just
+ * a blank page. Hence two layers: skip the attempt for hosts we know refuse,
+ * and keep a link to the original on screen whenever we do frame.
  */
 export default function ArticlePane({ url, title, domain, onShowComments }: Props) {
   const policy = framePolicy(url);
-
-  // Tracked by URL rather than as booleans, so switching stories resets both
-  // without an effect that resets state on every change.
-  const [loadedUrl, setLoadedUrl] = useState<string | null>(null);
-  const [hintUrl, setHintUrl] = useState<string | null>(null);
-  const loaded = loadedUrl !== null && loadedUrl === url;
-  const showHint = hintUrl !== null && hintUrl === url;
-
-  useEffect(() => {
-    if (policy !== "embed" || loaded) return;
-    const timer = setTimeout(() => setHintUrl(url), HINT_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [policy, loaded, url]);
 
   // top-[100px] clears the nav and item header. Anchoring to bottom-0 rather
   // than using a height sidesteps iOS's shifting viewport entirely.
@@ -54,7 +37,6 @@ export default function ArticlePane({ url, title, domain, onShowComments }: Prop
       <iframe
         src={url}
         title={title}
-        onLoad={() => setLoadedUrl(url)}
         className="h-full w-full border-0 bg-white"
         // allow-same-origin is safe here because the framed document is
         // cross-origin, so the sandbox origin is the site's own. Omitting
@@ -63,19 +45,14 @@ export default function ArticlePane({ url, title, domain, onShowComments }: Prop
         referrerPolicy="no-referrer-when-downgrade"
       />
 
-      {showHint && (
-        <div className="absolute inset-x-0 bottom-0 flex items-center gap-2 border-t border-gray-200 bg-white/95 px-4 py-2 text-xs text-gray-500 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/95 dark:text-gray-400">
-          <span className="min-w-0 flex-1">Not loading? Some sites block embedding.</span>
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 font-medium text-orange-600 hover:underline dark:text-orange-400"
-          >
-            Open original <span aria-hidden>&#8599;</span>
-          </a>
-        </div>
-      )}
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-4 left-4 rounded-full bg-gray-900/90 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-sm dark:bg-gray-100/90 dark:text-gray-900"
+      >
+        Open original <span aria-hidden>&#8599;</span>
+      </a>
     </div>
   );
 }
