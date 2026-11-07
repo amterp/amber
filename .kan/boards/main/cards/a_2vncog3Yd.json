@@ -1,0 +1,17 @@
+{
+  "_v": 4,
+  "alias": "article-view-view",
+  "alias_explicit": false,
+  "column": "next",
+  "created_at_millis": 1794089041024,
+  "creator": "Alexander Terp",
+  "description": "On a touch device, loading `/item?id=...\u0026view=article` fresh (a reload, or a shared link) opens the comments instead of the article, and the URL loses `view=article`.\n\n`useCoarsePointer` returns its server snapshot, `false`, during hydration (`lib/use-coarse-pointer.ts:33`). `ItemView` has an effect that strips `view=article` for mouse users (`app/item/item-view.tsx`, \"A mouse user landing on ?view=article\"). That effect runs after the hydration commit, when `coarse` is still `false`, so it removes the param before the client re-renders with the real value.\n\nSeen 2026-11-07 in Playwright with iPhone 13 emulation: `matchMedia(\"(pointer: coarse)\")` was true, yet the URL ended up as `/item?id=50399933` with the comments shown. Tapping the Article tab after load works, since that happens after hydration.\n\nFix direction: don't act on `coarse` until the client snapshot is in, for example by having the hook report \"unknown\" during hydration.",
+  "id": "a_2vncog3Yd",
+  "position": "a0",
+  "title": "article view: ?view=article dropped on fresh load",
+  "type": "bug",
+  "updated_at_millis": 1794089041024,
+  "history": [
+    {"field":"column","value":"next","at":1794089041024}
+  ]
+}
